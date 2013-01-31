@@ -1,13 +1,12 @@
 #! /usr/bin/env python
-import os
 from setuptools import setup
 
 import allink_essentials
 setup(
     name='allink_essentials',
     version=allink_essentials.__version__,
-    description='django based newsletter toolkit',
-    long_description=open(os.path.join(os.path.dirname(__file__), 'README.rst')).read(),
+    description='collection of code fragments',
+    long_description='collection of code fragments',
     author='Marc Egli',
     author_email='egli@allink.ch',
     url='http://github.com/allink/allink-essentials/',
