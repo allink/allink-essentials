@@ -15,6 +15,7 @@ setup(
     packages=[
         'allink_essentials',
         'allink_essentials.fabfiles',
+        'allink_essentials.in_footer',
     ],
     # package_data={'allink_essentials':'templates/*.html'},
     classifiers=[
