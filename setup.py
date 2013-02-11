@@ -19,6 +19,7 @@ setup(
         'allink_essentials.in_footer.templatetags',
         'allink_essentials.middleware',
         'allink_essentials.storage',
+        'allink_essentials.view',
     ],
     # package_data={'allink_essentials':'templates/*.html'},
     classifiers=[
