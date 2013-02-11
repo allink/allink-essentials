@@ -17,6 +17,7 @@ setup(
         'allink_essentials.fabfiles',
         'allink_essentials.in_footer',
         'allink_essentials.in_footer.templatetags',
+        'allink_essentials.middleware',
         'allink_essentials.storage',
     ],
     # package_data={'allink_essentials':'templates/*.html'},
