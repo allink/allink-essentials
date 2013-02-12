@@ -14,6 +14,8 @@ if "VIRTUAL_ENV" not in os.environ:
 
 
 def _setup_path(name):
+    import sys
+    sys.path.insert(0, '.')
     settings = import_module('%s.settings_%s' % (env.project_python, name))
     env.django_settings = settings
     env.environment = name
