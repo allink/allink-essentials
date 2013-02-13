@@ -172,7 +172,7 @@ def reset_local_database():
     local_manage = os.path.join(os.path.dirname(__file__), 'manage.py')
     local_data = os.path.join(os.path.dirname(__file__), filename)
     with cd(env.code_root):
-        with prefix('source env/bin/activate'):
+        with prefix('source ../env/bin/activate'):
             run('./manage.py dumpdata > %s' % (server_data,))
         get(server_data, local_data)
         run('rm %s' % server_data)
@@ -188,8 +188,8 @@ def reset_local_media():
     if not console.confirm('Are you sure you want to replace the local media with the %s media data?'
                            % env.environment, default=False):
         utils.abort('Reset local media aborted.')
-    remote_media = os.path.join(env.project_root, 'media',)
-    local_media = os.path.join(os.path.dirname(__file__), 'media')
+    remote_media = os.path.join(env.code_root, 'media',)
+    local_media = 'media/'
     local('rsync --delete --exclude=".gitignore" -rvaz %s@%s:%s/ %s' % (env.user, env.hosts[0], remote_media, local_media))
 
 
