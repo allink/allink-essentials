@@ -3,9 +3,9 @@ from django.views.generic import RedirectView
 
 
 class FuzzyLanguageRedirectView(RedirectView):
-    permanent = False
+    permanent = True  # don't loose link juice http://www.seomoz.org/learn-seo/redirection
     language_keys = dict(settings.LANGUAGES).keys()
-    
+
     def get_redirect_url(self, **kwargs):
         """
         Return the URL redirect to. Keyword arguments from the
