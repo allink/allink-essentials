@@ -169,8 +169,8 @@ def reset_local_database():
     filename = "tmp_dump%d_%d_%d.json" % datetime.datetime.now().isocalendar()
     require('code_root', provided_by=('staging', 'production'))
     server_data = os.path.join(env.project_root, filename)
-    local_manage = os.path.join(os.path.dirname(__file__), 'manage.py')
-    local_data = os.path.join(os.path.dirname(__file__), filename)
+    local_manage = 'manage.py'
+    local_data = filename
     with cd(env.code_root):
         with prefix('source ../env/bin/activate'):
             run('./manage.py dumpdata > %s' % (server_data,))
