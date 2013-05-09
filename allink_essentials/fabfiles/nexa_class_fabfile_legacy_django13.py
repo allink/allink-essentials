@@ -169,8 +169,8 @@ def reset_local_database():
     filename = "tmp_dump%d_%d_%d.json" % datetime.datetime.now().isocalendar()
     require('code_root', provided_by=('staging', 'production'))
     server_data = os.path.join(env.project_root, filename)
-    local_manage = 'manage.py'
-    local_data = filename
+    local_manage = os.path.join(os.getcwd(), 'manage.py')
+    local_data = os.path.join(os.getcwd(), filename)
     with cd(env.code_root):
         with prefix('source ../env/bin/activate'):
             run('./manage.py dumpdata > %s' % (server_data,))
@@ -189,7 +189,7 @@ def reset_local_media():
                            % env.environment, default=False):
         utils.abort('Reset local media aborted.')
     remote_media = os.path.join(env.code_root, 'media',)
-    local_media = 'media/'
+    local_media = os.path.join(os.getcwd(), 'media/')
     local('rsync --delete --exclude=".gitignore" -rvaz %s@%s:%s/ %s' % (env.user, env.hosts[0], remote_media, local_media))
 
 

@@ -183,8 +183,8 @@ def reset_local_database():
     require('code_root', provided_by=('staging', 'production'))
     server_manage = os.path.join(env.project_root, 'manage.py')
     server_data = os.path.join(env.project_root, filename)
-    local_manage = 'manage.py'
-    local_data = filename
+    local_manage = os.path.join(os.getcwd(), 'manage.py')
+    local_data = os.path.join(os.getcwd(), filename)
     with cd(env.project_root):
         with prefix('source env/bin/activate'):
             run('./env/bin/python %s dumpdata > %s' % (server_manage, server_data,))
@@ -203,7 +203,7 @@ def reset_local_media():
                            % env.environment, default=False):
         utils.abort('Reset local media aborted.')
     remote_media = os.path.join(env.project_root, 'media',)
-    local_media = os.path.join(os.path.dirname(__file__), 'media')
+    local_media = os.path.join(os.getcwd(), 'media')
     local('rsync --delete --exclude=".gitignore" -rvaz %s@%s:%s/ %s' % (env.user, env.hosts[0], remote_media, local_media))
 
 
