@@ -15,6 +15,7 @@ setup(
     packages=[
         'allink_essentials',
         'allink_essentials.fabfiles',
+        'allink_essentials.feincms_extensions',
         'allink_essentials.in_footer',
         'allink_essentials.in_footer.templatetags',
         'allink_essentials.middleware',
