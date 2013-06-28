@@ -13,7 +13,7 @@ def register(cls, admin_cls):
     def og_title(self):
         if self._og_title:
             return self._og_title
-        return self.title
+        return self.meta_title
 
     @monkeypatch_property(cls)
     def og_description(self):

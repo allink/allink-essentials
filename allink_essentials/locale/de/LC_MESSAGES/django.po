@@ -1,0 +1,91 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-06-28 10:43+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: feincms_extensions/metas.py:8
+msgid "Meta Title"
+msgstr "Seitentitel"
+
+#: feincms_extensions/metas.py:8
+msgid ""
+"Meta title for browser window and search engines. Same as title by default. "
+"Recommended structure \"Primary Keyword - Secondary Keyword | Brand Name"
+"\" (max. 69)."
+msgstr ""
+"Wird im Titel des Browser angezeigt, wichtig für Suchmaschinenoptimierung. Aufbau: Erstes Keyword - Zweites Keyword (max. 69 Zeichen). Ihr Markenname wird am Schluss automatisch hinzugefügt."
+
+#: feincms_extensions/metas.py:9
+msgid "Meta Description"
+msgstr "Meta Beschreibung"
+
+#: feincms_extensions/metas.py:9
+msgid "Meta description for search engines (max 139)."
+msgstr "Meta Beschreibung für Suchmaschinen (max. 139 Zeichen)."
+
+#: feincms_extensions/metas.py:10
+msgid "Navigation Title"
+msgstr "Navigationstitel"
+
+#: feincms_extensions/metas.py:10
+msgid "Used in navigation. Same as title by default."
+msgstr "Wird in der Seitennavigation angezeigt, falls leer wird der Titel verwendet."
+
+#: feincms_extensions/metas.py:26
+msgid "Meta Fields"
+msgstr "Meta Felder"
+
+#: feincms_extensions/socials.py:8
+msgid "Title"
+msgstr "Titel"
+
+#: feincms_extensions/socials.py:8
+msgid "Used for og:title. Same as title by default."
+msgstr "Wird für den og:titel auf Facebook verwendet. Falls leer, wird der Meta Title verwendet"
+
+#: feincms_extensions/socials.py:9
+msgid "Description"
+msgstr "Beschreibung"
+
+#: feincms_extensions/socials.py:9
+msgid "Used for og:description. Same as meta description by default."
+msgstr "Wird für od:desciription auf Facebook verwendet, falls leer wird die Meta Description verwendet."
+
+#: feincms_extensions/socials.py:10
+msgid "Image"
+msgstr "Vorschaubild"
+
+#: feincms_extensions/socials.py:10
+msgid "Used for og:image."
+msgstr "Wird für od:image auf Facebook verwendet."
+
+#: feincms_extensions/socials.py:26
+msgid "Social Fields"
+msgstr "Social Felder"
+
+#: in_footer/page_extension.py:13
+msgid "In footer"
+msgstr "Im Footer angezeigt"
+
+#: in_footer/page_extension.py:14
+msgid "This displays the page in the footer navigation."
+msgstr "Diese Seite wird in der Footernavigation dargestellt, wenn ausgewählt."
+
+#: in_footer/page_extension.py:16
+msgid "in footer"
+msgstr "Im Footer angezeigt"
