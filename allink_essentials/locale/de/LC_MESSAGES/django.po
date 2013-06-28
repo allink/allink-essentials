@@ -56,7 +56,7 @@ msgstr "Titel"
 
 #: feincms_extensions/socials.py:8
 msgid "Used for og:title. Same as title by default."
-msgstr "Wird für den og:titel auf Facebook verwendet. Falls leer, wird der Meta Title verwendet"
+msgstr "Wird für den og:titel auf Facebook verwendet. Falls leer, wird der Seitentitel verwendet"
 
 #: feincms_extensions/socials.py:9
 msgid "Description"
@@ -64,7 +64,7 @@ msgstr "Beschreibung"
 
 #: feincms_extensions/socials.py:9
 msgid "Used for og:description. Same as meta description by default."
-msgstr "Wird für od:desciription auf Facebook verwendet, falls leer wird die Meta Description verwendet."
+msgstr "Wird für od:desciription auf Facebook verwendet, falls leer wird die Meta Beschreibung verwendet."
 
 #: feincms_extensions/socials.py:10
 msgid "Image"
