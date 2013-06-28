@@ -1,2 +1,2 @@
-recursive-include pennyblack/locale *.po
-recursive-include pennyblack/locale *.mo
+recursive-include allink_essentials/locale *.po
+recursive-include allink_essentials/locale *.mo
