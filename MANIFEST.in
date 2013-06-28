@@ -1,0 +1,2 @@
+recursive-include pennyblack/locale *.po
+recursive-include pennyblack/locale *.mo
