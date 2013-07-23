@@ -10,7 +10,7 @@ def register(cls, admin_cls):
     cls.add_to_class('og_image', models.ImageField(_('og:image'), blank=True, null=True, upload_to='og_images', help_text=_('Preview image when sharing in social networks.')))
 
     @monkeypatch_property(cls)
-    def meta_title(self):
+    def title_tag(self):
         if self._title_tag:
             return self._title_tag
         return self.title
