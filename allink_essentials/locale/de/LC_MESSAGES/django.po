@@ -8,27 +8,29 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-06-28 10:43+0200\n"
+"POT-Creation-Date: 2013-07-23 16:52+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: feincms_extensions/metas.py:8
-msgid "Meta Title"
-msgstr "Seitentitel"
+msgid "Title Tag"
+msgstr ""
 
 #: feincms_extensions/metas.py:8
 msgid ""
-"Meta title for browser window and search engines. Same as title by default. "
-"Recommended structure \"Primary Keyword - Secondary Keyword | Brand Name"
-"\" (max. 69)."
+"Title for browser window and search engines. Same as title by default. "
+"Recommended structure \"Primary Keyword - Secondary Keyword\" (max. 69). "
+"Your brand name will be added by default."
 msgstr ""
-"Wird im Titel des Browser angezeigt, wichtig für Suchmaschinenoptimierung. Aufbau: Erstes Keyword - Zweites Keyword (max. 69 Zeichen). Ihr Markenname wird am Schluss automatisch hinzugefügt."
+"Wird im Titel des Browser angezeigt, wichtig für Suchmaschinenoptimierung. "
+"Aufbau: Erstes Keyword - Zweites Keyword (max. 69 Zeichen). Ihr Markenname "
+"wird am Schluss automatisch hinzugefügt."
 
 #: feincms_extensions/metas.py:9
 msgid "Meta Description"
@@ -39,14 +41,14 @@ msgid "Meta description for search engines (max 139)."
 msgstr "Meta Beschreibung für Suchmaschinen (max. 139 Zeichen)."
 
 #: feincms_extensions/metas.py:10
-msgid "Navigation Title"
-msgstr "Navigationstitel"
+msgid "og:image"
+msgstr ""
 
 #: feincms_extensions/metas.py:10
-msgid "Used in navigation. Same as title by default."
-msgstr "Wird in der Seitennavigation angezeigt, falls leer wird der Titel verwendet."
+msgid "Preview image when sharing in social networks."
+msgstr "Vorschaubild für das Teilen in sozialen Netzwerken."
 
-#: feincms_extensions/metas.py:26
+#: feincms_extensions/metas.py:20
 msgid "Meta Fields"
 msgstr "Meta Felder"
 
@@ -56,7 +58,9 @@ msgstr "Titel"
 
 #: feincms_extensions/socials.py:8
 msgid "Used for og:title. Same as title by default."
-msgstr "Wird für den og:titel auf Facebook verwendet. Falls leer, wird der Seitentitel verwendet"
+msgstr ""
+"Wird für den og:titel auf Facebook verwendet. Falls leer, wird der "
+"Seitentitel verwendet"
 
 #: feincms_extensions/socials.py:9
 msgid "Description"
@@ -64,17 +68,11 @@ msgstr "Beschreibung"
 
 #: feincms_extensions/socials.py:9
 msgid "Used for og:description. Same as meta description by default."
-msgstr "Wird für od:desciription auf Facebook verwendet, falls leer wird die Meta Beschreibung verwendet."
+msgstr ""
+"Wird für od:desciription auf Facebook verwendet, falls leer wird die Meta "
+"Beschreibung verwendet."
 
-#: feincms_extensions/socials.py:10
-msgid "Image"
-msgstr "Vorschaubild"
-
-#: feincms_extensions/socials.py:10
-msgid "Used for og:image."
-msgstr "Wird für od:image auf Facebook verwendet."
-
-#: feincms_extensions/socials.py:26
+#: feincms_extensions/socials.py:25
 msgid "Social Fields"
 msgstr "Social Felder"
 

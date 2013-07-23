@@ -7,7 +7,6 @@ from feincms._internal import monkeypatch_property
 def register(cls, admin_cls):
     cls.add_to_class('_og_title', models.CharField(_('Title'), max_length=69, blank=True, help_text=_('Used for og:title. Same as title by default.')))
     cls.add_to_class('_og_description', models.TextField(_('Description'), blank=True, help_text=_('Used for og:description. Same as meta description by default.')))
-    cls.add_to_class('og_image', models.ImageField(_('Image'), blank=True, null=True, upload_to='og_images', help_text=_('Used for og:image.')))
 
     @monkeypatch_property(cls)
     def og_title(self):
@@ -24,6 +23,6 @@ def register(cls, admin_cls):
     if admin_cls:
         admin_cls.search_fields.extend(['_og_title', '_og_description'])
         admin_cls.add_extension_options(_('Social Fields'), {
-            'fields': ('_og_title', '_og_description', 'og_image',),
+            'fields': ('_og_title', '_og_description',),
             'classes': ('collapse',),
         })
