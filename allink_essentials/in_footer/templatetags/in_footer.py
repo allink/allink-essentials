@@ -10,7 +10,7 @@ register = template.Library()
 
 class FooterNavigationNode(SimpleAssignmentNodeWithVarAndArgs):
     """
-    {% load footer_tags %}
+    {% load in_footer %}
     {% footer_navigation for feincms_page as footer_pages %}
     {% for p in footer_pages %}
         <a href="{{p.get_absolute_url}}">{{p.title}}</a>{% if not forloop.last %} |{% endif %}
