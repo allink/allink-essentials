@@ -17,6 +17,7 @@ class FooterNavigationNode(SimpleAssignmentNodeWithVarAndArgs):
     {% endfor %}
     """
     def what(self, page, args, default=None):
-        return Page.objects.active().filter(in_footer=True).filter(language=translation.get_language())
+        queryset = Page.objects.active().filter(in_footer=True)
+        return queryset.filter(language=translation.get_language()) if 'language' in [f.name for f in Page._meta.fields] else queryset
         
 register.tag('footer_navigation', do_simple_assignment_node_with_var_and_args_helper(FooterNavigationNode))
