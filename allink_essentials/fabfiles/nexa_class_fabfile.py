@@ -190,10 +190,9 @@ def reset_local_database():
             run('./env/bin/python %s dumpdata > %s' % (server_manage, server_data,))
         get(server_data, local_data)
         run('rm %s' % server_data)
-    with lcd(os.path.dirname(__file__)):
-        local('%s sqlflush | %s dbshell' % (local_manage, local_manage))
-        local('%s loaddata %s' % (local_manage, local_data,))
-        local('rm %s' % local_data)
+    local('%s sqlflush | %s dbshell' % (local_manage, local_manage))
+    local('%s loaddata %s' % (local_manage, local_data,))
+    local('rm %s' % local_data)
 
 
 def reset_local_media():
