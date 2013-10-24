@@ -1,2 +1,3 @@
 recursive-include allink_essentials/locale *.po
 recursive-include allink_essentials/locale *.mo
+recursive-include allink_essentials *.html

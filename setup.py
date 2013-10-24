@@ -14,6 +14,8 @@ setup(
     platforms=['OS Independent'],
     packages=[
         'allink_essentials',
+        'allink_essentials.analytics',
+        'allink_essentials.analytics.templatetags',
         'allink_essentials.fabfiles',
         'allink_essentials.feincms_extensions',
         'allink_essentials.in_footer',
