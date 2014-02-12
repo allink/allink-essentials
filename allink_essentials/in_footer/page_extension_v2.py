@@ -13,7 +13,7 @@ class Extension(extensions.Extension):
 
     def handle_modeladmin(self, modeladmin):
         modeladmin.list_display.extend(['in_footer'])
-        modeladmin.list_editable.extend(['in_footer'])
+        modeladmin.list_editable += ('in_footer',)
         modeladmin.add_extension_options(_('Footer Navigation'), {
             'fields': ('in_footer',),
         })
