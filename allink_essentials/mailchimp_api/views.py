@@ -12,7 +12,7 @@ class SignupView(FormView):
 
     def __init__(self, **kwargs):
         super(SignupView, self).__init__(**kwargs)
-        if 'MAILCHIMP_SIGNUP_FORM' in settings:
+        if getattr(settings, 'MAILCHIMP_SIGNUP_FORM', False):
             self.form_class = import_by_path(settings.MAILCHIMP_SIGNUP_FORM)
 
     def form_valid(self, form):
