@@ -20,6 +20,7 @@ setup(
         'allink_essentials.feincms_extensions',
         'allink_essentials.in_footer',
         'allink_essentials.in_footer.templatetags',
+        'allink_essentials.mailchimp_api',
         'allink_essentials.middleware',
         'allink_essentials.storage',
         'allink_essentials.view',

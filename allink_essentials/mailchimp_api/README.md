@@ -23,7 +23,7 @@ If the SignupForm is customized it should inherit mailchimp_api.forms.SignupForm
 Urls
 ----
 Include mailchimp_api.urls in the main urls file.
-<pre>url(r'^mailchimp/$', include('mailchimp_api.urls')),</pre>
+<pre>url(r'^mailchimp/$', include('allink_essentials.mailchimp_api.urls')),</pre>
 
 Template
 --------
