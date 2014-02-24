@@ -1,9 +1,9 @@
 from django.conf import settings
 from django.http import HttpResponse
-from django.utils.module_loading import import_string
+from django.utils.module_loading import import_by_path
 from django.views.generic import FormView
 
-from mailchimp_api.forms import SignupForm
+from allink_essentials.mailchimp_api.forms import SignupForm
 
 
 class SignupView(FormView):
@@ -13,7 +13,7 @@ class SignupView(FormView):
     def __init__(self, **kwargs):
         super(SignupView, self).__init__(**kwargs)
         if 'MAILCHIMP_SIGNUP_FORM' in settings:
-            self.form_class = import_string(settings.MAILCHIMP_SIGNUP_FORM)
+            self.form_class = import_by_path(settings.MAILCHIMP_SIGNUP_FORM)
 
     def form_valid(self, form):
         form.save()
