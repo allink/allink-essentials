@@ -13,8 +13,8 @@ Settings
 
 * optional:
     * MAILCHIMP_SIGNUP_FORM as 'my_app.forms.SignupForm'
-    * MAILCHIMP_DOUBLE_OPTIN (default is False)
-    * MAILCHIMP_SEND_WELCOME (default is False)
+    * MAILCHIMP_DOUBLE_OPTIN (default is True)
+    * MAILCHIMP_SEND_WELCOME (default is True)
 
 Form
 ----
