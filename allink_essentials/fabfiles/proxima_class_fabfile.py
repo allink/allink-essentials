@@ -163,9 +163,15 @@ def restart_webapp():
 def setup_celery():
     """create a rabbitmq vhost and user"""
     require('virtualenv_root', provided_by=env.deployments)
-    run('sudo rabbitmqctl add_user %(rabbitmq_username)s %(rabbitmq_password)s' % env.django_settings.DEPLOYMENT)
-    run('sudo rabbitmqctl add_vhost %(rabbitmq_vhost)s' % env.django_settings.DEPLOYMENT)
-    run('sudo rabbitmqctl set_permissions -p %(rabbitmq_vhost)s %(rabbitmq_username)s ".*" ".*" ".*"' % env.django_settings.DEPLOYMENT)
+    user = env.django_settings.UNIQUE_PREFIX
+    vhost = env.django_settings.UNIQUE_PREFIX
+    allowed_chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+    password = ''.join(random.choice(allowed_chars) for i in range(10))
+    run('sudo rabbitmqctl add_user %s %s' % (user, password))
+    run('sudo rabbitmqctl add_vhost %s' % vhost)
+    run('sudo rabbitmqctl set_permissions -p %s %s ".*" ".*" ".*"' % (vhost, user))
+    _add_to_dotenv('BROKER_URL', 'amqp://%s:%s@localhost:5672/%s' % (user, password, vhost))
+    _add_to_dotenv('CELERY_RESULT_BACKEND', 'redis://localhost/0')
 
 
 def restart_celery():
