@@ -74,7 +74,9 @@ def bootstrap():
     with cd(env.project_root), prefix('source env/bin/activate'):
         run('./manage.py loaddata allink_user.json')
 
-    execute('_compilemessages')
+    # only compile messages if locale folder is present
+    if os.path.isdir(os.path.join(os.path.dirname(__file__), 'locale')):
+        execute('compilemessages')
 
 
 def delete_pyc():
@@ -100,7 +102,9 @@ def deploy():
             utils.abort('Production deployment aborted.')
     execute('git_pull')
     execute('migrate')
-    execute('compilemessages')
+    # only compile messages if locale folder is present
+    if os.path.isdir(os.path.join(os.path.dirname(__file__), 'locale')):
+        execute('compilemessages')
     execute('collectstatic')
     execute('restart_webapp')
     execute('restart_celery')
