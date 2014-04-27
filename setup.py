@@ -18,6 +18,7 @@ setup(
         'allink_essentials.analytics.templatetags',
         'allink_essentials.fabfiles',
         'allink_essentials.feincms_extensions',
+        'allink_essentials.logging',
         'allink_essentials.in_footer',
         'allink_essentials.in_footer.templatetags',
         'allink_essentials.mailchimp_api',
