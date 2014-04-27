@@ -14,7 +14,7 @@ if "VIRTUAL_ENV" not in os.environ:
 
 def _setup_path(name):
     sys.path.insert(0, '.')
-    settings = import_module('%s.settings_%s' % (env.project_python, name))
+    settings = import_module('%s.settings.%s' % (env.project_python, name))
     env.django_settings = settings
     env.environment = name
     for key, value in settings.DEPLOYMENT.items():
@@ -22,7 +22,7 @@ def _setup_path(name):
 
     env.project_root = os.path.join(env.root, env.project)
     env.virtualenv_root = os.path.join(env.project_root, 'env')
-    env.settings = '%(project)s.settings_%(environment)s' % env
+    env.settings = '%(project)s.settings.%(environment)s' % env
     env.forward_agent = True
     env.is_local = False
 
@@ -35,7 +35,7 @@ def local():
     sys.path.insert(0, '.')
     env.is_local = True
     env.root = os.path.dirname(__file__)
-    settings = import_module('%s.settings_development' % env.project_python)
+    settings = import_module('%s.settings.development' % env.project_python)
     env.django_settings = settings
     env.environment = 'development'
 
@@ -52,7 +52,7 @@ def bootstrap():
         run("git clone %s %s" % (env.git_repository, env.project))
 
     # add DJANGO_SETTINGS_MODULE to .env
-    _add_to_dotenv('DJANGO_SETTINGS_MODULE', '%s.settings_%s' % (env.project_python, env.environment))
+    _add_to_dotenv('DJANGO_SETTINGS_MODULE', '%s.settings.%s' % (env.project_python, env.environment))
 
     # generate SECRET_KEY
     allowed_chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
@@ -194,7 +194,7 @@ def _add_to_dotenv(key, value):
 # Local Commands
 # ==============
 def dump_database():
-    local_settings = import_module('settings_development')
+    local_settings = import_module('settings.development')
     require('virtualenv_root', provided_by=env.deployments)
     if not console.confirm('Are you sure you want to replace the local database with the %s database data?'
                            % env.environment, default=False):
