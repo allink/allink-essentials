@@ -15,6 +15,7 @@ Settings
     * MAILCHIMP_SIGNUP_FORM as 'my_app.forms.SignupForm'
     * MAILCHIMP_DOUBLE_OPTIN (default is True)
     * MAILCHIMP_SEND_WELCOME (default is True)
+    * MAILCHIMP_ADDITIONAL_FIELDS (Used if different subscriber groups are needed. ex.: {'newsletter': 'yes'})
 
 Form
 ----
