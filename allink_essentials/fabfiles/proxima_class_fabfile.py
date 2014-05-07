@@ -78,6 +78,9 @@ def bootstrap():
     if os.path.isdir(os.path.join(os.path.dirname(__file__), 'locale')):
         execute('compilemessages')
 
+    execute('update_js_requirements')
+    execute('collectstatic')
+
 
 def delete_pyc():
     if env.is_local:
@@ -109,6 +112,7 @@ def deploy():
     execute('restart_webapp')
     execute('restart_celery')
 
+
 def git_pull():
     "Updates the repository."
     with cd(env.project_root):
@@ -137,6 +141,16 @@ def update_requirements():
                 run('pip install --requirement REQUIREMENTS_SERVER')
 
 
+def update_js_requirements():
+    """ update external javascript dependencies on remote host """
+    require('root', provided_by=('local',) + env.deployments)
+    if env.is_local:
+        run_local('npm install')
+    else:
+        with cd(env.project_root):
+                run('npm install')
+
+
 def create_database():
     database_name = env.django_settings.UNIQUE_PREFIX
     if env.is_local:
@@ -146,7 +160,7 @@ def create_database():
         database = env.django_settings.UNIQUE_PREFIX
         allowed_chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
         password = ''.join(random.choice(allowed_chars) for i in range(10))
-        run ('psql -U $PGUSER -d postgres -c "CREATE USER %s WITH PASSWORD \'%s\';"' % (user, password))
+        run('psql -U $PGUSER -d postgres -c "CREATE USER %s WITH PASSWORD \'%s\';"' % (user, password))
         run('psql -U $PGUSER -d postgres -c "CREATE DATABASE %s;"' % database)
         run('psql -U $PGUSER -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE %s to %s;"' % (database, user))
         _add_to_dotenv('DATABASE_URL', 'postgres://%s:%s@localhost/%s' % (user, password, database))
