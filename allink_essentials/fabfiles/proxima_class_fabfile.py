@@ -59,12 +59,13 @@ def bootstrap():
     secret_key = ''.join(random.choice(allowed_chars) for i in range(50)).replace('!', '\\!').replace('&', '\\&').replace('$', '\\$')
     _add_to_dotenv('SECRET_KEY', secret_key)
 
-    # create virtualenv
+    # some one time setup things
     with cd(env.project_root):
         if env.git_branch != 'master':
             run('git checkout %s' % (env.git_branch,))
-        run('virtualenv %s' % env.virtualenv_root)
         run('mkdir static/')
+
+    # create virtualenv and install all the requirements
     execute('update_requirements')
 
     execute('create_database')
@@ -132,13 +133,35 @@ def collectstatic():
 
 
 def update_requirements():
-    """ update external dependencies on remote host """
+    """update external dependencies on remote host """
     require('root', provided_by=('local',) + env.deployments)
     if env.is_local:
         run_local('pip install --requirement REQUIREMENTS_LOCAL')
     else:
-        with cd(env.project_root), prefix('source env/bin/activate'):
-                run('pip install --requirement REQUIREMENTS_SERVER')
+        _update_requirements_remote()
+
+
+def _update_requirements_remote():
+    with cd(env.project_root):
+        result = run('sha1sum --check REQUIREMENTS.sha1', quiet=True)
+        if result.return_code is 0:
+            print "No need to update virtualenv."
+            return
+        virtualenv_existed = exists('env')
+        if virtualenv_existed:
+            # virtualenv exists, build wheels for the new requirements
+            with prefix('source env/bin/activate'):
+                run('pip wheel --requirement REQUIREMENTS_SERVER')
+            run('rm -r env_old', quiet=True)
+            run('mv env env_old')
+
+        # create new virtualenv
+        run('virtualenv env --prompt="(%s)"' % env.project)
+        with prefix('source env/bin/activate'):
+            run('pip install wheel')
+            run('pip install %s --requirement REQUIREMENTS_SERVER' % ('--no-index' if virtualenv_existed else '',))
+        # create new hash file
+        run('sha1sum --tag REQUIREMENTS REQUIREMENTS_SERVER > REQUIREMENTS.sha1')
 
 
 def update_js_requirements():
