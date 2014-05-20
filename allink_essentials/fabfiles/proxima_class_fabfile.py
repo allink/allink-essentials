@@ -104,12 +104,18 @@ def deploy():
         if not console.confirm('Are you sure you want to deploy production?',
                                default=False):
             utils.abort('Production deployment aborted.')
+    with cd(env.project_root):
+        result = run('git diff-index --name-only HEAD --', quiet=True)
+    if result != '':
+        utils.abort('There are local changes')
+    utils.abort('end')
     execute('git_pull')
     execute('migrate')
     # only compile messages if locale folder is present
     if os.path.isdir(os.path.join(os.path.dirname(__file__), 'locale')):
         execute('compilemessages')
     execute('collectstatic')
+    execute('delete_pyc')
     execute('restart_webapp')
     execute('restart_celery')
 
