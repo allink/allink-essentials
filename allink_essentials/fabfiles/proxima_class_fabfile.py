@@ -1,7 +1,6 @@
 import os
 import sys
 import random
-from importlib import import_module
 
 from fabric.api import run, execute, env, cd, prefix, local as run_local, require
 from fabric.contrib import console
@@ -12,14 +11,7 @@ if "VIRTUAL_ENV" not in os.environ:
     raise Exception("$VIRTUAL_ENV not found.")
 
 
-def _setup_path(name):
-    sys.path.insert(0, '.')
-    settings = import_module('%s.settings.%s' % (env.project_python, name))
-    env.django_settings = settings
-    env.environment = name
-    for key, value in settings.DEPLOYMENT.items():
-        setattr(env, key, value)
-
+def _setup_path():
     env.project_root = os.path.join(env.root, env.project)
     env.virtualenv_root = os.path.join(env.project_root, 'env')
     env.settings = '%(project)s.settings.%(environment)s' % env
@@ -32,11 +24,8 @@ def _setup_path(name):
 
 
 def local():
-    sys.path.insert(0, '.')
     env.is_local = True
     env.root = os.path.dirname(__file__)
-    settings = import_module('%s.settings.development' % env.project_python)
-    env.django_settings = settings
     env.environment = 'development'
 
 # ===============
@@ -58,6 +47,10 @@ def bootstrap():
     allowed_chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
     secret_key = ''.join(random.choice(allowed_chars) for i in range(50)).replace('!', '\\!').replace('&', '\\&').replace('$', '\\$')
     _add_to_dotenv('SECRET_KEY', secret_key)
+
+    # add cache to dotenv
+    _add_to_dotenv('CACHE_URL', 'hiredis://127.0.0.1:6379/1/%s' % env.unique_identifier)
+    _add_to_dotenv('SESSION_CACHE_URL', 'hiredis://127.0.0.1:6379/2/%s' % env.unique_identifier)
 
     # some one time setup things
     with cd(env.project_root):
@@ -181,12 +174,12 @@ def update_js_requirements():
 
 
 def create_database():
-    database_name = env.django_settings.UNIQUE_PREFIX
+    database_name = env.unique_identifier
     if env.is_local:
         run_local('psql -U $PGUSER -d postgres -c "CREATE DATABASE %s;"' % database_name)
     else:
-        user = env.django_settings.UNIQUE_PREFIX
-        database = env.django_settings.UNIQUE_PREFIX
+        user = env.unique_identifier
+        database = env.unique_identifier
         allowed_chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
         password = ''.join(random.choice(allowed_chars) for i in range(10))
         run('psql -U $PGUSER -d postgres -c "CREATE USER %s WITH PASSWORD \'%s\';"' % (user, password))
@@ -206,8 +199,8 @@ def restart_webapp():
 def setup_celery():
     """create a rabbitmq vhost and user"""
     require('virtualenv_root', provided_by=env.deployments)
-    user = env.django_settings.UNIQUE_PREFIX
-    vhost = env.django_settings.UNIQUE_PREFIX
+    user = env.unique_identifier
+    vhost = env.unique_identifier
     allowed_chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
     password = ''.join(random.choice(allowed_chars) for i in range(10))
     run('sudo rabbitmqctl add_user %s %s' % (user, password))
@@ -244,7 +237,7 @@ def dump_database():
         utils.abort('Reset local database aborted.')
     local('psql -U $PGUSER -d postgres -c "DROP DATABASE %s;"' % (local_settings.UNIQUE_PREFIX))
     local('psql -U $PGUSER -d postgres -c "CREATE DATABASE %s;"' % (local_settings.UNIQUE_PREFIX))
-    local('ssh %s@%s "source ~/.profile; pg_dump -U \$PGUSER db_%s" | psql -U $PGUSER %s' % (env.django_settings.DEPLOYMENT['user'], env.django_settings.DEPLOYMENT['hosts'][0], env.django_settings.UNIQUE_PREFIX, local_settings.UNIQUE_PREFIX))
+    local('ssh %s@%s "source ~/.profile; pg_dump -U \$PGUSER db_%s" | psql -U $PGUSER %s' % (env.django_settings.DEPLOYMENT['user'], env.django_settings.DEPLOYMENT['hosts'][0], env.unique_identifier, local_settings.UNIQUE_PREFIX))
 
 
 def dump_media():
