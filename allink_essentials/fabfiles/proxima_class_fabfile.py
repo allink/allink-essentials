@@ -18,16 +18,6 @@ def _setup_path():
     env.forward_agent = True
     env.is_local = False
 
-# =================
-# Local Environment
-# =================
-
-
-def local():
-    env.is_local = True
-    env.root = os.path.dirname(__file__)
-    env.environment = 'development'
-
 # ===============
 # Public Commands
 # ===============
