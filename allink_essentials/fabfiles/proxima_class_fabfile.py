@@ -4,7 +4,7 @@ import random
 
 from fabric.api import run, execute, env, cd, prefix, local as run_local, require
 from fabric.contrib import console
-from fabric.contrib.files import append
+from fabric.contrib.files import append, exists
 from fabric import utils
 
 if "VIRTUAL_ENV" not in os.environ:
