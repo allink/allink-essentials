@@ -5,6 +5,7 @@ import random
 from fabric.api import run, execute, env, cd, prefix, local as run_local, require
 from fabric.contrib import console
 from fabric.contrib.files import append, exists
+from fabric.colors import green, magenta, yellow
 from fabric import utils
 
 if "VIRTUAL_ENV" not in os.environ:
@@ -27,9 +28,11 @@ def bootstrap():
     """ initialize remote host environment (virtualenv, deploy, update) """
     require('virtualenv_root', provided_by=env.deployments)
 
+    print magenta("Cloning Repository")
     with cd(env.root):
         run("git clone %s %s" % (env.git_repository, env.project))
 
+    print magenta("Create .env file")
     # add DJANGO_SETTINGS_MODULE to .env
     _add_to_dotenv('DJANGO_SETTINGS_MODULE', '%s.settings.%s' % (env.project_python, env.environment))
 
@@ -55,6 +58,7 @@ def bootstrap():
 
     execute('migrate')
 
+    print magenta("Load initial data")
     with cd(env.project_root), prefix('source env/bin/activate'):
         run('./manage.py loaddata allink_user.json')
 
@@ -77,6 +81,7 @@ def delete_pyc():
 def migrate():
     """migrates all apps on the remote host"""
     require('virtualenv_root', provided_by=env.deployments)
+    print magenta("Migrate database")
     with cd(env.project_root), prefix('source env/bin/activate'):
         run('./manage.py migrate --noinput')
 
@@ -105,18 +110,21 @@ def deploy():
 
 def git_pull():
     "Updates the repository."
+    print magenta("Fetch newest version")
     with cd(env.project_root):
         run("git pull")
 
 
 def compilemessages():
     """compiles all translations"""
+    print magenta("Compile messages")
     with cd(env.project_root), prefix('source env/bin/activate'):
         run('./manage.py compilemessages')
 
 
 def collectstatic():
     """runs collectstatic on the remote host"""
+    print magenta("Collect static files")
     with cd(env.project_root), prefix('source env/bin/activate'):
         run('./manage.py collectstatic --noinput')
 
@@ -124,6 +132,7 @@ def collectstatic():
 def update_requirements():
     """update external dependencies on remote host """
     require('root', provided_by=('local',) + env.deployments)
+    print magenta("Update requirements")
     if env.is_local:
         run_local('pip install --requirement REQUIREMENTS_LOCAL')
     else:
@@ -134,8 +143,9 @@ def _update_requirements_remote():
     with cd(env.project_root):
         result = run('sha1sum --check REQUIREMENTS.sha1', quiet=True)
         if result.return_code is 0:
-            print "No need to update virtualenv."
+            print green("No need to update virtualenv.")
             return
+        print yellow("Need to create a new virtualenv")
         virtualenv_existed = exists('env')
         if virtualenv_existed:
             # virtualenv exists, build wheels for the new requirements
@@ -156,6 +166,7 @@ def _update_requirements_remote():
 def update_js_requirements():
     """ update external javascript dependencies on remote host """
     require('root', provided_by=('local',) + env.deployments)
+    print magenta("Install javascript requirements")
     if env.is_local:
         run_local('npm install')
     else:
@@ -165,6 +176,7 @@ def update_js_requirements():
 
 def create_database():
     database_name = env.unique_identifier
+    print magenta("Create database")
     if env.is_local:
         run_local('psql -U $PGUSER -d postgres -c "CREATE DATABASE %s;"' % database_name)
     else:
