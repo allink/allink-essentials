@@ -5,11 +5,14 @@ import random
 from fabric.api import run, execute, env, cd, prefix, local as run_local, require
 from fabric.contrib import console
 from fabric.contrib.files import append, exists
-from fabric.colors import green, magenta, yellow
+from fabric.colors import green, magenta, red, yellow
+from fabric import state
 from fabric import utils
 
 if "VIRTUAL_ENV" not in os.environ:
     raise Exception("$VIRTUAL_ENV not found.")
+
+state.output['running'] = False
 
 
 def _setup_path():
@@ -49,7 +52,8 @@ def bootstrap():
     with cd(env.project_root):
         if env.git_branch != 'master':
             run('git checkout %s' % (env.git_branch,))
-        run('mkdir static/')
+        run('mkdir static')
+        run('mkdir media')
 
     # create virtualenv and install all the requirements
     execute('update_requirements')
@@ -89,7 +93,7 @@ def migrate():
 def deploy():
     """ updates code base on remote host and restarts server process """
     if not env.is_stage:
-        if not console.confirm('Are you sure you want to deploy production?',
+        if not console.confirm(red('Are you sure you want to deploy production?', bold=True),
                                default=False):
             utils.abort('Production deployment aborted.')
     with cd(env.project_root):
@@ -232,21 +236,20 @@ def _add_to_dotenv(key, value):
 # Local Commands
 # ==============
 def dump_database():
-    local_settings = import_module('settings.development')
     require('virtualenv_root', provided_by=env.deployments)
-    if not console.confirm('Are you sure you want to replace the local database with the %s database data?'
-                           % env.environment, default=False):
+    if not console.confirm(red('Are you sure you want to replace the local database with the %s database data?'
+                           % env.environment, bold=True), default=False):
         utils.abort('Reset local database aborted.')
-    local('psql -U $PGUSER -d postgres -c "DROP DATABASE %s;"' % (local_settings.UNIQUE_PREFIX))
-    local('psql -U $PGUSER -d postgres -c "CREATE DATABASE %s;"' % (local_settings.UNIQUE_PREFIX))
-    local('ssh %s@%s "source ~/.profile; pg_dump -U \$PGUSER db_%s" | psql -U $PGUSER %s' % (env.django_settings.DEPLOYMENT['user'], env.django_settings.DEPLOYMENT['hosts'][0], env.unique_identifier, local_settings.UNIQUE_PREFIX))
+    run_local('psql -U $PGUSER -d postgres -c "DROP DATABASE %s;"' % (env.project_python,), warn_only=True)
+    run_local('psql -U $PGUSER -d postgres -c "CREATE DATABASE %s;"' % (env.project_python,))
+    run_local('ssh %s@%s "source ~/.profile; pg_dump -U\$PGUSER %s" | psql -U$PGUSER %s' % (env.user, env.hosts[0], env.unique_identifier, env.project_python))
 
 
 def dump_media():
     """ Reset local media from remote host """
     require('virtualenv_root', provided_by=env.deployments)
-    if not console.confirm('Are you sure you want to replace the local media with the %s media data?'
-                           % env.environment, default=False):
+    if not console.confirm(red('Are you sure you want to replace the local media with the %s media data?'
+                               % env.environment, bold=True), default=False):
         utils.abort('Reset local media aborted.')
     remote_media = os.path.join(env.project_root, 'media',)
     local_media = os.path.join(os.getcwd(), 'media')
