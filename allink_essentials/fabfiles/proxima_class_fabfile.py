@@ -54,6 +54,7 @@ def bootstrap():
             run('git checkout %s' % (env.git_branch,))
         run('mkdir static')
         run('mkdir media')
+        run('mkdir tmp')
 
     # create virtualenv and install all the requirements
     execute('update_requirements')
@@ -191,6 +192,7 @@ def create_database():
         run('psql -U $PGUSER -d postgres -c "CREATE USER %s WITH PASSWORD \'%s\';"' % (user, password))
         run('psql -U $PGUSER -d postgres -c "CREATE DATABASE %s;"' % database)
         run('psql -U $PGUSER -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE %s to %s;"' % (database, user))
+        run('psql -U $PGUSER -d postgres -c "GRANT %s to $PGUSER;"' % user)
         _add_to_dotenv('DATABASE_URL', 'postgres://%s:%s@localhost/%s' % (user, password, database))
 
 
