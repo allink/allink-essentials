@@ -102,9 +102,10 @@ def deploy():
     with cd(env.project_root):
         result = run('git diff-index --name-only HEAD --', quiet=True)
     if result != '':
-        utils.abort('There are local changes')
-    utils.abort('end')
+        utils.abort(red('There are local changes'))
+        utils.abort('end')
     execute('git_pull')
+    execute('update_requirements')
     execute('migrate')
     # only compile messages if locale folder is present
     if os.path.isdir(os.path.join(os.path.dirname(__file__), 'locale')):
