@@ -76,11 +76,13 @@ def bootstrap():
 
 
 def delete_pyc():
+    print magenta("Delete *.pyc files")
+    command = 'find . -name \*.pyc -print0 | xargs -0 rm'
     if env.is_local:
-        run_local('find . -name \*.pyc | xargs rm')
+        run_local(command)
     else:
         with cd(env.project_root):
-            run('find . -name \*.pyc | xargs rm')
+            run(command)
 
 
 def migrate():
