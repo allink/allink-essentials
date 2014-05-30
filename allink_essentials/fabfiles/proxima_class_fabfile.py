@@ -245,9 +245,9 @@ def dump_database():
     if not console.confirm(red('Are you sure you want to replace the local database with the %s database data?'
                            % env.environment, bold=True), default=False):
         utils.abort('Reset local database aborted.')
-    run_local('psql -U $PGUSER -d postgres -c "DROP DATABASE %s;"' % (env.project_python,), warn_only=True)
+    run_local('psql -U $PGUSER -d postgres -c "DROP DATABASE %s;"' % (env.project_python,))
     run_local('psql -U $PGUSER -d postgres -c "CREATE DATABASE %s;"' % (env.project_python,))
-    run_local('ssh %s@%s "source ~/.profile; pg_dump -U\$PGUSER %s" | psql -U$PGUSER %s' % (env.user, env.hosts[0], env.unique_identifier, env.project_python))
+    run_local('ssh %s@%s "source ~/.profile; pg_dump -U\$PGUSER --no-privileges --no-owner --no-reconnect %s | gzip" | gunzip |psql --quiet -U$PGUSER %s' % (env.user, env.hosts[0], env.unique_identifier, env.project_python))
 
 
 def dump_media():
