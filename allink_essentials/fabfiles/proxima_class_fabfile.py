@@ -113,12 +113,12 @@ def deploy():
         utils.abort('end')
     execute('git_pull')
     execute('update_requirements')
+    execute('delete_pyc')
     execute('migrate')
     # only compile messages if locale folder is present
     if os.path.isdir(os.path.join(os.path.dirname(__file__), 'locale')):
         execute('compilemessages')
     execute('collectstatic')
-    execute('delete_pyc')
     execute('restart_webapp')
     execute('restart_celery')
 
