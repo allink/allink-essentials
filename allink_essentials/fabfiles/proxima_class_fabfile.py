@@ -123,6 +123,15 @@ def deploy():
     execute('restart_celery')
 
 
+def dotenv(**kwargs):
+    """ adds a key value pair to the .env file on a server """
+    require('root', provided_by=env.deployments)
+    if not len(kwargs):
+        utils.abort('missing variable. usage: fab production dotenv:MYVAR=myvalue')
+    for key, value in kwargs.items():
+        _add_to_dotenv(key, value)
+
+
 def git_pull():
     "Updates the repository."
     print magenta("Fetch newest version")
