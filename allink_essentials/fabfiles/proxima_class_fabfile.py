@@ -75,7 +75,7 @@ def bootstrap():
         run('./manage.py loaddata allink_user.json')
 
     # only compile messages if locale folder is present
-    if os.path.isdir(os.path.join(os.path.dirname(__file__), 'locale')):
+    if os.path.isdir('locale'):
         execute('compilemessages')
 
     execute('update_js_requirements')
