@@ -2,15 +2,22 @@ import os
 import datetime
 from importlib import import_module
 import subprocess
+import random
 
-from fabric.api import *
+from fabric.api import run, execute, env, cd, prefix, local as run_local, require
 from fabric.context_managers import path
 from fabric.contrib import files, console, django
 from fabric import utils
+from fabric import state
+from fabric.colors import green, magenta, red, yellow
 from fabric.decorators import hosts
 
 if "VIRTUAL_ENV" not in os.environ:
     raise Exception("$VIRTUAL_ENV not found.")
+
+state.output['running'] = False
+state.output['stdout'] = False
+
 
 
 def _setup_path(name):
@@ -24,192 +31,220 @@ def _setup_path(name):
 
     env.project_root = os.path.join(env.root, env.project)
     env.code_root = os.path.join(env.project_root, env.project_python)
-    env.virtualenv_root = os.path.join(env.project_root, 'env')
     env.settings = '%(project)s.settings_%(environment)s' % env
+    env.forward_agent = True
+    env.is_local = False
+
+
+def local():
+    env.is_local = True
+    import sys
+    sys.path.insert(0, '.')
+    settings = import_module('%s.settings_development' % env.project_python)
+    env.django_settings = settings
+    env.project_root = ''
+    env.code_root = ''
+    env.root= '.'
+    env.environment = 'development'
+
+
+env.deployments = ('production',)
+
+def verbose():
+    """enables running and stdout output"""
+    state.output['running'] = True
+    state.output['stdout'] = True
+
+# ===============
+# Public Commands
+# ===============
 
 
 def bootstrap():
     """ initialize remote host environment (virtualenv, deploy, update) """
-    require('root', provided_by=('staging', 'production'))
-    #run('mkdir -p %s' % os.path.join(env.root, 'log'))
-    git_clone()
-    git_checkout_branch()
-    create_virtualenv()
-    create_library_symlinks()
-    update_requirements()
-    create_symlinks()
+    require('root', provided_by=env.deployments)
+
+    print magenta("Cloning Repository")
+    with cd(env.root):
+        run("git clone %s" % env.git_repository)
+
+    # some one time setup things
+    with cd(env.project_root):
+        if env.git_branch != 'master':
+            run('git checkout %s' % (env.git_branch,))
+        run('mkdir static')
+        run('mkdir media')
+
+    with cd(env.code_root):
+        run('ln -sf settings_%s.py settings.py' % env.environment)
+
+    # create virtualenv and install all the requirements
+    execute('create_virtualenv')
+    execute('update_requirements')
+    execute('create_database')
+    execute('syncdb')
+    execute('migrate')
+    execute('create_allink_user')
+
+    print magenta("Load initial data")
+    with cd(env.project_root), prefix('source env/bin/activate'):
+        run('./manage.py loaddata allink_user.json')
+
+    # only compile messages if locale folder is present
+    if os.path.isdir('locale'):
+        execute('compilemessages')
+
+    execute('collectstatic')
+
+
+def delete_pyc():
+    print magenta("Delete *.pyc files")
+    command = 'find . -name \*.pyc -print0 | xargs -0 rm'
+    if env.is_local:
+        run_local(command)
+    else:
+        with cd(env.project_root):
+            run(command)
 
 
 def create_virtualenv():
     """ setup virtualenv on remote host """
-    require('virtualenv_root', provided_by=('staging', 'production'))
+    require('project_root', provided_by=env.deployments)
     args = '--setuptools'
-    run('virtualenv %s %s' % (args, env.virtualenv_root))
-
-
-def git_pull():
-    "Updates the repository."
-    require('code_root', provided_by=('staging', 'production'))
-    with cd(env.code_root):
-        run("git pull")
-
-
-def git_clone():
-    "Updates the repository."
-    require('root', provided_by=('staging', 'production'))
-    with cd(env.root):
-        run("git clone %s %s" % (env.git_repository, env.project))
-
-
-def git_checkout_branch():
-    "Checks out the correct branch."
-    require('root', provided_by=('staging', 'production'))
-    if env.git_branch != 'master':
-        with cd(env.project_root):
-            run('git checkout %s' % (env.git_branch,))
-
-
-def git_reset():
-    "Resets the repository to specified version."
-    run("cd ~/git/$(repo)/; git reset --hard $(hash)")
+    run('virtualenv %s %s' % (args, os.path.join(env.project_root, 'env')))
 
 
 def deploy():
     """ updates code base on remote host and restarts server process """
     if not env.is_stage:
-        if not console.confirm('Are you sure you want to deploy production?',
+        if not console.confirm(red('Are you sure you want to deploy production?', bold=True),
                                default=False):
             utils.abort('Production deployment aborted.')
-    git_pull()
-    touch()
+    with cd(env.project_root):
+        result = run('git diff-index --name-only HEAD --', quiet=True)
+    if result != '':
+        utils.abort(red('There are local changes'))
+        utils.abort('end')
+    execute('git_pull')
+    execute('update_requirements')
+    execute('delete_pyc')
+    execute('migrate')
+    # only compile messages if locale folder is present
+    if os.path.isdir(os.path.join(os.path.dirname(__file__), 'locale')):
+        execute('compilemessages')
+    execute('collectstatic')
+    execute('restart_webapp')
+    execute('restart_celery')
 
 
-def deployfull():
-    """ updates code base on remote host and restarts server process """
-    if not env.is_stage:
-        if not console.confirm('Are you sure you want to deploy production?',
-                               default=False):
-            utils.abort('Production deployment aborted.')
-    git_pull()
-    migrate()
-    collectstatic()
-    touch()
+def git_pull():
+    "Updates the repository."
+    print magenta("Fetch newest version")
+    with cd(env.code_root):
+        run("git pull")
 
 
 def update_requirements():
     """ update external dependencies on remote host """
-    require('code_root', provided_by=('staging', 'production'))
-    with cd(env.project_root):
-        with prefix('source env/bin/activate'):
-            run('pip install --requirement REQUIREMENTS_SERVER')
-
-
-def manage(command):
-    """runs manage.py <command> on the remote host"""
-    require('code_root', provided_by=('staging', 'production'))
-    manage = os.path.join(env.project_root, 'manage.py')
-    with cd(env.project_root):
-        run('./env/bin/python %s %s' % (manage, command))
-
-
-def syncdb():
-    """runs syncdb on the remote host"""
-    require('code_root', provided_by=('staging', 'production'))
-    with cd(env.project_root):
-        with prefix('source env/bin/activate'):
-            run('./manage.py syncdb --noinput')
-
-
-def createsu():
-    """create superuser with sso credentials on the remote host"""
-    create_allink_user()
-
-
-def create_allink_user():
-    """loads the allink_user.json fixture"""
-    require('code_root', provided_by=('staging', 'production'))
-    with cd(env.project_root):
-        with prefix('source env/bin/activate'):
-            run('./manage.py loaddata allink_user.json')
-
-
-def migrate():
-    """migrates all apps on the remote host"""
-    require('code_root', provided_by=('staging', 'production'))
-    with cd(env.project_root):
-        with prefix('source env/bin/activate'):
-            run('./manage.py migrate')
+    require('project_root', provided_by=('local',) + env.deployments)
+    print magenta("Update requirements")
+    if env.is_local:
+        run_local('pip install --requirement REQUIREMENTS_LOCAL')
+    else:
+        with cd(env.project_root):
+            with prefix('source env/bin/activate'):
+                run('pip install --requirement REQUIREMENTS_SERVER')
 
 
 def compilemessages():
     """compiles all translations"""
-    require('code_root', provided_by=('staging', 'production'))
+    print magenta("Compile messages")
     with cd(env.project_root):
         with prefix('source env/bin/activate'):
             run('./manage.py compilemessages')
 
 
-def create_symlinks():
-    """ create settings feincms and admin media links"""
-    require('code_root', provided_by=('staging', 'production'))
-    with cd(env.project_root):
-        run('mkdir static/')
-    with cd(env.code_root):
-        run('ln -sf settings_%s.py settings.py' % env.environment)
+def collectstatic():
+    """runs collectstatic on the remote host"""
+    print magenta("Collect static files")
+    with cd(env.project_root), prefix('source env/bin/activate'):
+        run('./manage.py collectstatic --noinput')
 
 
-def touch():
+def create_database():
+    database_name = env.django_settings.UNIQUE_PREFIX
+    print magenta("Create database")
+    if env.is_local:
+        run_local('mysql --user=$MYSQL_USER -p$MYSQL_PASSWORD -e "CREATE DATABASE %s;"' % database_name)
+    else:
+        database = env.django_settings.UNIQUE_PREFIX
+        run('mysql --user=$MYSQL_USER -p$MYSQL_PASSWORD -e "CREATE DATABASE db_%s;"' % database)
+
+
+def restart_webapp():
     """ touch wsgi file to trigger reload """
-    require('code_root', provided_by=('staging', 'production'))
+    require('project_root', provided_by=env.deployments)
+    print magenta("Restart webapp")
     with cd(env.project_root):
         run('touch apache.wsgi')
 
 
-def collectstatic():
-    """runs collectstatic on the remote host"""
-    require('code_root', provided_by=('staging', 'production'))
+def restart_celery():
+    """restarts the celery worker"""
+    require('project_root', provided_by=env.deployments)
+    print magenta("Restart celery")
+    run('nine-supervisorctl restart %s' % env.celery_worker)
+
+
+def syncdb():
+    """runs syncdb on the remote host"""
+    require('project_root', provided_by=env.deployments)
+    print magenta("Syncronize database")
     with cd(env.project_root):
         with prefix('source env/bin/activate'):
-            run('./manage.py collectstatic --noinput')
+            run('./manage.py syncdb --noinput')
 
 
-def reset_local_database():
+def migrate():
+    """migrates all apps on remote host"""
+    require('project_root', provided_by=env.deployments)
+    print magenta("Migrate database")
+    with cd(env.project_root), prefix('source env/bin/activate'):
+        run('./manage.py migrate')
+
+
+def setup_celery():
+    """create a rabbitmq vhost and user"""
+    require('project_root', provided_by=env.deployments)
+    run('sudo rabbitmqctl add_user %(rabbitmq_username)s %(rabbitmq_password)s' % env.django_settings.DEPLOYMENT)
+    run('sudo rabbitmqctl add_vhost %(rabbitmq_vhost)s' % env.django_settings.DEPLOYMENT)
+    run('sudo rabbitmqctl set_permissions -p %(rabbitmq_vhost)s %(rabbitmq_username)s ".*" ".*" ".*"' % env.django_settings.DEPLOYMENT)
+
+
+# ==============
+# Local Commands
+# ==============
+
+def dump_database():
     """ resets the local database to the database on the server """
-    require('code_root', provided_by=('staging', 'production'))
-    if not console.confirm('Are you sure you want to replace the local database with the %s database data?'
-                           % env.environment, default=False):
+    local_settings = import_module('%s.settings_development' % env.project_python)
+    require('project_root', provided_by=env.deployments)
+    if not console.confirm(red('Are you sure you want to replace the local database with the %s database data?'
+                           % env.environment, bold=True), default=False):
         utils.abort('Reset local database aborted.')
-    filename = "tmp_dump%d_%d_%d.json" % datetime.datetime.now().isocalendar()
-    require('code_root', provided_by=('staging', 'production'))
-    server_manage = os.path.join(env.project_root, 'manage.py')
-    server_data = os.path.join(env.project_root, filename)
-    local_manage = os.path.join(os.getcwd(), 'manage.py')
-    local_data = os.path.join(os.getcwd(), filename)
-    with cd(env.project_root):
-        with prefix('source env/bin/activate'):
-            run('./env/bin/python %s dumpdata > %s' % (server_manage, server_data,))
-        get(server_data, local_data)
-        run('rm %s' % server_data)
-    local('%s sqlflush | %s dbshell' % (local_manage, local_manage))
-    local('%s loaddata %s' % (local_manage, local_data,))
-    local('rm %s' % local_data)
+    run_local('mysql --user=$MYSQL_USER -p$MYSQL_PASSWORD -e "DROP DATABASE %s; CREATE DATABASE %s;"' % (local_settings.UNIQUE_PREFIX, local_settings.UNIQUE_PREFIX))
+    run_local('ssh %s@%s "source ~/.profile; mysqldump -u \$MYSQL_USER -p\$MYSQL_PASSWORD db_%s | gzip" | gunzip | mysql -u $MYSQL_USER -p$MYSQL_PASSWORD %s' % (env.django_settings.DEPLOYMENT['user'], env.django_settings.DEPLOYMENT['hosts'][0], env.django_settings.UNIQUE_PREFIX, local_settings.UNIQUE_PREFIX))
 
 
-def reset_local_media():
+def dump_media():
     """ Reset local media from remote host """
-    require('root', provided_by=('staging', 'production'))
-    if not console.confirm('Are you sure you want to replace the local media with the %s media data?'
-                           % env.environment, default=False):
+    require('project_root', provided_by=env.deployments)
+    if not console.confirm(red('Are you sure you want to replace the local media with the %s media data?'
+                               % env.environment, bold=True), default=False):
         utils.abort('Reset local media aborted.')
     remote_media = os.path.join(env.project_root, 'media',)
     local_media = os.path.join(os.getcwd(), 'media')
-    local('rsync --delete --exclude=".gitignore" -rvaz %s@%s:%s/ %s' % (env.user, env.hosts[0], remote_media, local_media))
-
-
-def restart_celery():
-    """restarts the celery worker"""
-    require('root', provided_by=('staging', 'production'))
-    run('nine-supervisorctl restart %s' % env.celery_worker)
+    run_local('rsync --delete --exclude=".gitignore" -rvaz %s@%s:%s/ %s' % (env.user, env.hosts[0], remote_media, local_media))
 
 
 def create_local_symlinks():
@@ -222,27 +257,7 @@ def create_local_symlinks():
         os.symlink("../../pre-commit", ".git/hooks/pre-commit")
 
 
-def create_library_symlinks():
-    """used on ubuntu servers to compile pil"""
-    require('root', provided_by='production')
-    with cd(env.project_root):
-        for library in ('libfreetype.so', 'libjpeg.so', 'libz.so'):
-            run("ln -s /usr/lib/`uname -i`-linux-gnu/%s env/lib/" % library)
-
-
-def create_rabbitmq_vhost():
-    """create a rabbitmq vhost and user"""
-    require('root', provided_by='production')
-    run('sudo rabbitmqctl add_user %(rabbitmq_username)s %(rabbitmq_password)s' % env.django_settings.DEPLOYMENT)
-    run('sudo rabbitmqctl add_vhost %(rabbitmq_vhost)s' % env.django_settings.DEPLOYMENT)
-    run('sudo rabbitmqctl set_permissions -p %(rabbitmq_vhost)s %(rabbitmq_username)s ".*" ".*" ".*"' % env.django_settings.DEPLOYMENT)
-
-
-def update_local_requirements():
-    """installs local requirements"""
-    subprocess.call(["pip", "install", "--requirement", "REQUIREMENTS_LOCAL"])
-
-
+# sollte zb django>=1.6,<1.7 nicht zerstoeren
 def freeze_requirements():
     with open("REQUIREMENTS") as file:
         for line in file:

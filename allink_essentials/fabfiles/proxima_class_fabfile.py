@@ -139,6 +139,16 @@ def git_pull():
         run("git pull")
 
 
+def update_requirements():
+    """update external dependencies on remote host """
+    require('root', provided_by=('local',) + env.deployments)
+    print magenta("Update requirements")
+    if env.is_local:
+        run_local('pip install --requirement REQUIREMENTS_LOCAL')
+    else:
+        _update_requirements_remote()
+
+
 def compilemessages():
     """compiles all translations"""
     print magenta("Compile messages")
@@ -151,16 +161,6 @@ def collectstatic():
     print magenta("Collect static files")
     with cd(env.project_root), prefix('source env/bin/activate'):
         run('./manage.py collectstatic --noinput')
-
-
-def update_requirements():
-    """update external dependencies on remote host """
-    require('root', provided_by=('local',) + env.deployments)
-    print magenta("Update requirements")
-    if env.is_local:
-        run_local('pip install --requirement REQUIREMENTS_LOCAL')
-    else:
-        _update_requirements_remote()
 
 
 def _update_requirements_remote():
