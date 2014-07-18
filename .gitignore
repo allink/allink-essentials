@@ -1,1 +1,5 @@
 *.pyc
+/build
+/dist
+/allink_essentials.egg-info
+.DS_Store
