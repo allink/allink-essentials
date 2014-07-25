@@ -12,7 +12,7 @@ __all__ = ('local', 'verbose', 'bootstrap', 'delete_pyc', 'create_virtualenv',
            'collectstatic', 'create_database', 'restart_webapp',
            'restart_celery', 'syncdb', 'migrate', 'setup_celery',
            'dump_database', 'dump_media', 'create_local_symlinks',
-           'freeze_requirements')
+           'freeze_requirements', 'env')
 
 if "VIRTUAL_ENV" not in os.environ:
     raise Exception("$VIRTUAL_ENV not found.")
