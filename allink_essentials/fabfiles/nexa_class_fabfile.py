@@ -1,23 +1,24 @@
 import os
-import datetime
 from importlib import import_module
-import subprocess
-import random
 
 from fabric.api import run, execute, env, cd, prefix, local as run_local, require
-from fabric.context_managers import path
-from fabric.contrib import files, console, django
+from fabric.contrib import console
 from fabric import utils
 from fabric import state
-from fabric.colors import green, magenta, red, yellow
-from fabric.decorators import hosts
+from fabric.colors import magenta, red
+
+__all__ = ('local', 'verbose', 'bootstrap', 'delete_pyc', 'create_virtualenv',
+           'deploy', 'git_pull', 'update_requirements', 'compilemessages',
+           'collectstatic', 'create_database', 'restart_webapp',
+           'restart_celery', 'syncdb', 'migrate', 'setup_celery',
+           'dump_database', 'dump_media', 'create_local_symlinks',
+           'freeze_requirements')
 
 if "VIRTUAL_ENV" not in os.environ:
     raise Exception("$VIRTUAL_ENV not found.")
 
 state.output['running'] = False
 state.output['stdout'] = False
-
 
 
 def _setup_path(name):
@@ -44,11 +45,11 @@ def local():
     env.django_settings = settings
     env.project_root = ''
     env.code_root = ''
-    env.root= '.'
+    env.root = '.'
     env.environment = 'development'
 
-
 env.deployments = ('production',)
+
 
 def verbose():
     """enables running and stdout output"""
@@ -84,7 +85,6 @@ def bootstrap():
     execute('create_database')
     execute('syncdb')
     execute('migrate')
-    execute('create_allink_user')
 
     print magenta("Load initial data")
     with cd(env.project_root), prefix('source env/bin/activate'):
@@ -110,8 +110,7 @@ def delete_pyc():
 def create_virtualenv():
     """ setup virtualenv on remote host """
     require('project_root', provided_by=env.deployments)
-    args = '--setuptools'
-    run('virtualenv %s %s' % (args, os.path.join(env.project_root, 'env')))
+    run('virtualenv --setuptools --prompt="(%s)" %s' % (env.project, os.path.join(env.project_root, 'env')))
 
 
 def deploy():

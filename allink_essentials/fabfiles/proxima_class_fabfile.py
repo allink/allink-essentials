@@ -1,5 +1,4 @@
 import os
-import sys
 import random
 
 from fabric.api import run, execute, env, cd, prefix, local as run_local, require

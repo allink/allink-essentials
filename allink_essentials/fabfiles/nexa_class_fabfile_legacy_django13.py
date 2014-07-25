@@ -3,11 +3,11 @@ import datetime
 from importlib import import_module
 import subprocess
 
-from fabric.api import *
-from fabric.context_managers import path
-from fabric.contrib import files, console, django
 from fabric import utils
-from fabric.decorators import hosts
+from fabric.api import run, env, cd, prefix, local as run_local, require
+from fabric.context_managers import lcd
+from fabric.contrib import console
+from fabric.operations import get
 
 if "VIRTUAL_ENV" not in os.environ:
     raise Exception("$VIRTUAL_ENV not found.")
@@ -31,7 +31,6 @@ def _setup_path(name):
 def bootstrap():
     """ initialize remote host environment (virtualenv, deploy, update) """
     require('root', provided_by=('staging', 'production'))
-    #run('mkdir -p %s' % os.path.join(env.root, 'log'))
     git_clone()
     git_checkout_branch()
     create_virtualenv()
@@ -177,9 +176,9 @@ def reset_local_database():
         get(server_data, local_data)
         run('rm %s' % server_data)
     with lcd(os.path.dirname(__file__)):
-        local('%s sqlflush | %s dbshell' % (local_manage, local_manage))
-        local('%s loaddata %s' % (local_manage, local_data,))
-        local('rm %s' % local_data)
+        run_local('%s sqlflush | %s dbshell' % (local_manage, local_manage))
+        run_local('%s loaddata %s' % (local_manage, local_data,))
+        run_local('rm %s' % local_data)
 
 
 def reset_local_media():
@@ -190,7 +189,7 @@ def reset_local_media():
         utils.abort('Reset local media aborted.')
     remote_media = os.path.join(env.code_root, 'media',)
     local_media = os.path.join(os.getcwd(), 'media/')
-    local('rsync --delete --exclude=".gitignore" -rvaz %s@%s:%s/ %s' % (env.user, env.hosts[0], remote_media, local_media))
+    run_local('rsync --delete --exclude=".gitignore" -rvaz %s@%s:%s/ %s' % (env.user, env.hosts[0], remote_media, local_media))
 
 
 def create_local_symlinks():
