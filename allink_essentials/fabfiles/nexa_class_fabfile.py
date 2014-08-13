@@ -120,6 +120,7 @@ def deploy():
                                default=False):
             utils.abort('Production deployment aborted.')
     with cd(env.project_root):
+        result = run('git status', quiet=True)
         result = run('git diff-index --name-only HEAD --', quiet=True)
     if result != '':
         utils.abort(red('There are local changes'))
