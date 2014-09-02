@@ -26,6 +26,7 @@ def _setup_path(name):
     env.code_root = os.path.join(env.project_root, env.project_python)
     env.virtualenv_root = os.path.join(env.project_root, 'env')
     env.settings = 'settings_%(environment)s' % env
+    env.forward_agent = True
 
 
 def bootstrap():
