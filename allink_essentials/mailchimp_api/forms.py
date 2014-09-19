@@ -8,7 +8,7 @@ import mailchimp
 
 class SignupForm(forms.Form):
     email = forms.EmailField(label=_(u'E-Mail'))
-    language = forms.CharField(max_length=3)
+    language = forms.CharField(max_length=3, required=False)
 
     def save(self):
         email = self.cleaned_data['email']
