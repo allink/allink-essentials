@@ -18,3 +18,8 @@ class SignupView(FormView):
     def form_valid(self, form):
         form.save()
         return HttpResponse('ok')
+
+    def get_context_data(self, **kwargs):
+        data = super(SignupView, self).get_context_data(**kwargs)
+        data['mailchimp_signup_form'] = data.get('form')
+        return data
