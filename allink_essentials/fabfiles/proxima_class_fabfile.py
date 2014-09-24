@@ -301,7 +301,7 @@ def makemessages(**kwargs):
     """pulls out all strings marked for translation"""
     require('root', provided_by=('local',))
     if not len(kwargs) == 1 or 'lang' not in kwargs.keys():
-        utils.abort('missing language. usage: fab locale makemessages:lang=fr')
+        utils.abort('missing language. usage: fab local makemessages:lang=fr')
     print magenta("Make messages")
     with cd(env.root), prefix('source env/bin/activate'):
         run_local('./manage.py makemessages --domain=django --locale=%s --ignore=env/* --ignore=node_modules/*' % kwargs['lang'])
