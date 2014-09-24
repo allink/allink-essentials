@@ -152,8 +152,11 @@ def update_requirements():
 def compilemessages():
     """compiles all translations"""
     print magenta("Compile messages")
-    with cd(env.project_root), prefix('source env/bin/activate'):
-        run('./manage.py compilemessages')
+    if env.is_local:
+        run_local('./manage.py compilemessages')
+    else:
+        with cd(env.project_root), prefix('source env/bin/activate'):
+            run('./manage.py compilemessages')
 
 
 def collectstatic():
