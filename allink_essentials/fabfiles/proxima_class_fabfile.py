@@ -300,10 +300,12 @@ def freeze_requirements():
 def makemessages(**kwargs):
     """pulls out all strings marked for translation"""
     require('root', provided_by=('local',))
+    if not env.is_local:
+        utils.abort('runs on local env only. usage: fab local makemessages:lang=fr')
     if not len(kwargs) == 1 or 'lang' not in kwargs.keys():
         utils.abort('missing language. usage: fab local makemessages:lang=fr')
     print magenta("Make messages")
-    with cd(env.root), prefix('source env/bin/activate'):
-        run_local('./manage.py makemessages --domain=django --locale=%s --ignore=env/* --ignore=node_modules/*' % kwargs['lang'])
-        utils.warn('If your project contains translated javascript files in a folder called "static", rename settings.STATIC_ROOT temporarily before running this task. Ohterwise they would not be included!')
-        run_local('./manage.py makemessages --domain=djangojs --locale=%s --ignore=env/* --ignore=node_modules/*' % kwargs['lang'])
+    cmd = './manage.py makemessages --domain=%s --locale=%s --ignore=env/* --ignore=node_modules/*'
+    run_local(cmd % ('django', kwargs['lang']))
+    utils.puts('If you have javascript translations, don\'t forget to run:')
+    utils.puts(cmd % ('djangojs', kwargs['lang']))
