@@ -302,7 +302,7 @@ def makemessages(**kwargs):
     require('root', provided_by=('local',))
     if not env.is_local:
         utils.abort('runs on local env only. usage: fab local makemessages:lang=fr')
-    if not len(kwargs) == 1 or 'lang' not in kwargs.keys():
+    if 'lang' in kwargs:
         utils.abort('missing language. usage: fab local makemessages:lang=fr')
     print magenta("Make messages")
     cmd = './manage.py makemessages --domain=%s --locale=%s --ignore=env/* --ignore=node_modules/*'
