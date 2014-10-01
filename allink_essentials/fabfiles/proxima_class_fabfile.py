@@ -152,8 +152,11 @@ def update_requirements():
 def compilemessages():
     """compiles all translations"""
     print magenta("Compile messages")
-    with cd(env.project_root), prefix('source env/bin/activate'):
-        run('./manage.py compilemessages')
+    if env.is_local:
+        run_local('./manage.py compilemessages')
+    else:
+        with cd(env.project_root), prefix('source env/bin/activate'):
+            run('./manage.py compilemessages')
 
 
 def collectstatic():
@@ -292,3 +295,17 @@ def freeze_requirements():
                 pkg = line.rstrip().split('==')[0]
                 os.system("pip freeze | grep -i ^" + pkg + "== >> REQUIREMENTS_frozen")
     os.system("mv REQUIREMENTS_frozen REQUIREMENTS")
+
+
+def makemessages(**kwargs):
+    """pulls out all strings marked for translation"""
+    require('root', provided_by=('local',))
+    if not env.is_local:
+        utils.abort('runs on local env only. usage: fab local makemessages:lang=fr')
+    if 'lang' in kwargs:
+        utils.abort('missing language. usage: fab local makemessages:lang=fr')
+    print magenta("Make messages")
+    cmd = './manage.py makemessages --domain=%s --locale=%s --ignore=env/* --ignore=node_modules/*'
+    run_local(cmd % ('django', kwargs['lang']))
+    utils.puts('If you have javascript translations, don\'t forget to run:')
+    utils.puts(cmd % ('djangojs', kwargs['lang']))
