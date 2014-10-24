@@ -1,7 +1,7 @@
 import os
 import random
 
-from fabric.api import run, execute, env, cd, prefix, local as run_local, require
+from fabric.api import run, execute, env, cd, prefix, hide, local as run_local, require
 from fabric.contrib import console
 from fabric.contrib.files import append, exists
 from fabric.colors import green, magenta, red, yellow
@@ -268,7 +268,8 @@ def dump_database():
         utils.abort('Reset local database aborted.')
     save_ok_ret_codes = env.ok_ret_codes
     env.ok_ret_codes.append(1)
-    run_local('psql -U $PGUSER -d postgres -c "DROP DATABASE %s;"' % (env.project_python,))
+    with hide('output'):
+        run_local('psql -U $PGUSER -d postgres -c "DROP DATABASE %s;"' % (env.project_python,))
     env.ok_ret_codes = save_ok_ret_codes
     run_local('psql -U $PGUSER -d postgres -c "CREATE DATABASE %s;"' % (env.project_python,))
     run_local('ssh %s@%s "source ~/.profile; pg_dump -U\$PGUSER --no-privileges --no-owner --no-reconnect %s | gzip" | gunzip |psql --quiet -U$PGUSER %s' % (env.user, env.hosts[0], env.unique_identifier, env.project_python))
@@ -286,15 +287,15 @@ def dump_media():
 
 
 # sollte zb django>=1.6,<1.7 nicht zerstoeren
-def freeze_requirements():
-    with open("REQUIREMENTS") as file:
-        for line in file:
-            if line.lower().startswith('-e') or line.lower().startswith('http'):
-                os.system("echo '" + line.rstrip() + "' >> REQUIREMENTS_frozen")
-            else:
-                pkg = line.rstrip().split('==')[0]
-                os.system("pip freeze | grep -i ^" + pkg + "== >> REQUIREMENTS_frozen")
-    os.system("mv REQUIREMENTS_frozen REQUIREMENTS")
+# def freeze_requirements():
+#     with open("REQUIREMENTS") as file:
+#         for line in file:
+#             if line.lower().startswith('-e') or line.lower().startswith('http'):
+#                 os.system("echo '" + line.rstrip() + "' >> REQUIREMENTS_frozen")
+#             else:
+#                 pkg = line.rstrip().split('==')[0]
+#                 os.system("pip freeze | grep -i ^" + pkg + "== >> REQUIREMENTS_frozen")
+#     os.system("mv REQUIREMENTS_frozen REQUIREMENTS")
 
 
 def makemessages(**kwargs):

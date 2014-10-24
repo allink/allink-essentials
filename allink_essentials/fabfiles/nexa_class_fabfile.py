@@ -1,7 +1,7 @@
 import os
 from importlib import import_module
 
-from fabric.api import run, execute, env, cd, prefix, local as run_local, require
+from fabric.api import run, execute, env, cd, hide, prefix, local as run_local, require
 from fabric.contrib import console
 from fabric import utils
 from fabric import state
@@ -232,8 +232,14 @@ def dump_database():
     if not console.confirm(red('Are you sure you want to replace the local database with the %s database data?'
                            % env.environment, bold=True), default=False):
         utils.abort('Reset local database aborted.')
-    run_local('mysql --user=$MYSQL_USER -p$MYSQL_PASSWORD -e "DROP DATABASE %s; CREATE DATABASE %s;"' % (local_settings.UNIQUE_PREFIX, local_settings.UNIQUE_PREFIX))
-    run_local('ssh %s@%s "source ~/.profile; mysqldump -u \$MYSQL_USER -p\$MYSQL_PASSWORD db_%s | gzip" | gunzip | mysql -u $MYSQL_USER -p$MYSQL_PASSWORD %s' % (env.django_settings.DEPLOYMENT['user'], env.django_settings.DEPLOYMENT['hosts'][0], env.django_settings.UNIQUE_PREFIX, local_settings.UNIQUE_PREFIX))
+    try:
+        with hide('output'):
+            run_local('mysql --user=$MYSQL_USER -p$MYSQL_PASSWORD -e "DROP DATABASE %s;"' % (local_settings.UNIQUE_PREFIX))
+    except:
+        pass
+    with hide('output'):
+        run_local('mysql --user=$MYSQL_USER -p$MYSQL_PASSWORD -e "CREATE DATABASE %s;"' % (local_settings.UNIQUE_PREFIX))
+        run_local('ssh %s@%s "source ~/.profile; mysqldump -u \$MYSQL_USER -p\$MYSQL_PASSWORD db_%s | gzip" | gunzip | mysql -u $MYSQL_USER -p$MYSQL_PASSWORD %s' % (env.django_settings.DEPLOYMENT['user'], env.django_settings.DEPLOYMENT['hosts'][0], env.django_settings.UNIQUE_PREFIX, local_settings.UNIQUE_PREFIX))
 
 
 def dump_media():
@@ -258,12 +264,12 @@ def create_local_symlinks():
 
 
 # sollte zb django>=1.6,<1.7 nicht zerstoeren
-def freeze_requirements():
-    with open("REQUIREMENTS") as file:
-        for line in file:
-            if line.lower().startswith('-e') or line.lower().startswith('http'):
-                os.system("echo '" + line.rstrip() + "' >> REQUIREMENTS_frozen")
-            else:
-                pkg = line.rstrip().split('==')[0]
-                os.system("pip freeze | grep -i ^" + pkg + "== >> REQUIREMENTS_frozen")
-    os.system("mv REQUIREMENTS_frozen REQUIREMENTS")
+# def freeze_requirements():
+#     with open("REQUIREMENTS") as file:
+#         for line in file:
+#             if line.lower().startswith('-e') or line.lower().startswith('http'):
+#                 os.system("echo '" + line.rstrip() + "' >> REQUIREMENTS_frozen")
+#             else:
+#                 pkg = line.rstrip().split('==')[0]
+#                 os.system("pip freeze | grep -i ^" + pkg + "== >> REQUIREMENTS_frozen")
+#     os.system("mv REQUIREMENTS_frozen REQUIREMENTS")
