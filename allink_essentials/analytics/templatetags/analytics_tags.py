@@ -36,6 +36,11 @@ def ganalytics(parser, token):
         raise template.TemplateSyntaxError("'ganalytics can't take more than one argument")
 
 
+@register.inclusion_tag('analytics/google-tag-manager.html')
+def google_tag_manager():
+    return {'GOOGLE_TAG_MANAGER_ID': getattr(settings, 'GOOGLE_TAG_MANAGER_ID', None)}
+
+
 @register.inclusion_tag('analytics/google-ecommerce.html')
 def ecommerce_track(order):
     """ Usage: {% ecommerce_track order %} where `order` is a order object.
