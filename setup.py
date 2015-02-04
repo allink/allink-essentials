@@ -25,6 +25,7 @@ setup(
         'allink_essentials.middleware',
         'allink_essentials.storage',
         'allink_essentials.view',
+        'allink_essentials.search',
     ],
     # package_data={'allink_essentials':'templates/*.html'},
     classifiers=[
