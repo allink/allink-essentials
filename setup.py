@@ -8,7 +8,7 @@ setup(
     description='collection of code fragments',
     long_description='collection of code fragments',
     author='Marc Egli',
-    author_email='egli@allink.ch',
+    author_email='itcrowd@allink.ch',
     url='http://github.com/allink/allink-essentials/',
     license='BSD License',
     platforms=['OS Independent'],
