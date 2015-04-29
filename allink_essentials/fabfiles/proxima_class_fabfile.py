@@ -46,7 +46,7 @@ def bootstrap():
     _add_to_dotenv('DJANGO_SETTINGS_MODULE', '%s.settings.%s' % (env.project_python, env.environment))
 
     # generate SECRET_KEY
-    allowed_chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
+    allowed_chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@$%^&*(-_=+)'
     secret_key = ''.join(random.choice(allowed_chars) for i in range(50)).replace('!', '\\!').replace('&', '\\&').replace('$', '\\$')
     _add_to_dotenv('SECRET_KEY', secret_key)
 
