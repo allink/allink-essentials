@@ -234,9 +234,6 @@ def setup_celery():
     vhost = env.unique_identifier
     allowed_chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
     password = ''.join(random.choice(allowed_chars) for i in range(10))
-    run('sudo rabbitmqctl add_user %s %s' % (user, password))
-    run('sudo rabbitmqctl add_vhost %s' % vhost)
-    run('sudo rabbitmqctl set_permissions -p %s %s ".*" ".*" ".*"' % (vhost, user))
     _add_to_dotenv('BROKER_URL', 'amqp://%s:%s@localhost:5672/%s' % (user, password, vhost))
     _add_to_dotenv('CELERY_RESULT_BACKEND', 'redis://localhost/0')
 
