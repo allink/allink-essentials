@@ -79,6 +79,7 @@ def bootstrap():
 
     execute('update_js_requirements')
     execute('collectstatic')
+    execute('create_monit_file')
 
 
 def delete_pyc():
@@ -130,6 +131,23 @@ def dotenv(**kwargs):
         utils.abort('missing variable. usage: fab production dotenv:MYVAR=myvalue')
     for key, value in kwargs.items():
         _add_to_dotenv(key, value)
+
+
+def create_monit_file():
+    require('virtualenv_root', provided_by=env.deployments)
+    print magenta("Create Monit File")
+    with cd('/home/www-data/etc/monit.d/'):
+        run('echo "check process %s_gunicorn with pidfile /home/www-data/projects/%s/tmp/gunicorn.pid" > %s_gunicorn' % (env.unique_identifier, env.project, env.unique_identifier))
+        run('echo "\t#!/bin/sh" >> %s_gunicorn' % env.unique_identifier)
+        run("echo '\t%s' >> %s_gunicorn" % ('start program = "/home/www-data/projects/%s/startstop.sh start gunicorn"' % env.project, env.unique_identifier))
+        run("echo '\t%s' >> %s_gunicorn" % ('stop program = "/home/www-data/projects/%s/startstop.sh stop gunicorn"' % env.project, env.unique_identifier))
+        run('echo "\t%s" >> %s_gunicorn' % ("if failed unixsocket /home/www-data/projects/%s/tmp/gunicorn.sock then restart" % env.project, env.unique_identifier))
+        run('echo "\tif 5 restarts within 5 cycles then timeout" >> %s_gunicorn' % env.unique_identifier)
+        run('echo "\tif totalmemory > 200.0 MB for 5 cycles then alert" >> %s_gunicorn' % env.unique_identifier)
+        run('echo "\tif totalmemory > 300.0 MB for 10 cycles then restart" >> %s_gunicorn' % env.unique_identifier)
+        run('echo "\tif totalcpu > 50%% for 5 cycles then alert" >> %s_gunicorn' % env.unique_identifier)
+        run('echo "\tif totalcpu > 50%% for 10 cycles then restart" >> %s_gunicorn' % env.unique_identifier)
+        run('monit reload')
 
 
 def git_pull():
@@ -236,6 +254,25 @@ def setup_celery():
     password = ''.join(random.choice(allowed_chars) for i in range(10))
     _add_to_dotenv('BROKER_URL', 'amqp://%s:%s@localhost:5672/%s' % (user, password, vhost))
     _add_to_dotenv('CELERY_RESULT_BACKEND', 'redis://localhost/0')
+
+    print magenta("Create Monit File")
+    with cd('/home/www-data/etc/monit.d/'):
+        run('echo "check process %s_celery with pidfile /home/www-data/projects/%s/tmp/celery.pid" > %s_celery' % (env.unique_identifier, env.project, env.unique_identifier))
+        run('echo "\t#!/bin/sh" >> %s_celery' % env.unique_identifier)
+        run("echo '\t%s' >> %s_celery" % ('start program = "/home/www-data/projects/%s/startstop.sh start celery"' % env.project, env.unique_identifier))
+        run("echo '\t%s' >> %s_celery" % ('stop program = "/home/www-data/projects/%s/startstop.sh stop celery"' % env.project, env.unique_identifier))
+        run('echo "\tif 5 restarts within 5 cycles then timeout" >> %s_celery' % env.unique_identifier)
+        run('echo "\tif totalmemory > 200.0 MB for 5 cycles then alert" >> %s_celery' % env.unique_identifier)
+        run('echo "\tif totalmemory > 300.0 MB for 10 cycles then restart" >> %s_celery' % env.unique_identifier)
+        run('echo "\tif totalcpu > 50%% for 5 cycles then alert" >> %s_celery' % env.unique_identifier)
+        run('echo "\tif totalcpu > 50%% for 10 cycles then restart" >> %s_celery' % env.unique_identifier)
+
+    print yellow("Erstelle rabbitmq user und rabbitmq vhost im Web GUI (Tipp:Lastpass)")
+    print yellow("Username: %s" % user)
+    print yellow("PW: %s" % password)
+    print yellow("vhost: %s" % vhost)
+    print yellow("Dem user alle Berechtigungen für den vhost geben.")
+    print yellow("Auf Server: monit reload")
 
 
 def restart_celery():
