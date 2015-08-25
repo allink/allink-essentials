@@ -246,7 +246,6 @@ def restart_webapp():
 
 # evtl ersetzen durch setup celery -> monit config erstellen
 def setup_celery():
-    """create a rabbitmq vhost and user"""
     require('virtualenv_root', provided_by=env.deployments)
     user = env.unique_identifier
     vhost = env.unique_identifier
