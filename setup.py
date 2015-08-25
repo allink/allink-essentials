@@ -26,6 +26,7 @@ setup(
         'allink_essentials.storage',
         'allink_essentials.view',
         'allink_essentials.search',
+        'allink_essentials.mixins',
     ],
     # package_data={'allink_essentials':'templates/*.html'},
     classifiers=[
