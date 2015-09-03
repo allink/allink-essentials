@@ -1,6 +1,9 @@
 from django.conf import settings
 from django.http import HttpResponse
-from django.utils.module_loading import import_by_path
+try:
+    from django.utils.module_loading import import_by_path
+except:
+    from django.utils.module_loading import import_string as import_by_path
 from django.views.generic import FormView
 
 from allink_essentials.mailchimp_api.forms import SignupForm
