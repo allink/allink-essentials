@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import random
 
@@ -266,12 +267,12 @@ def setup_celery():
         run('echo "\tif totalcpu > 50%% for 5 cycles then alert" >> %s_celery' % env.unique_identifier)
         run('echo "\tif totalcpu > 50%% for 10 cycles then restart" >> %s_celery' % env.unique_identifier)
 
-    print yellow("Erstelle rabbitmq user und rabbitmq vhost im Web GUI (Tipp:Lastpass)")
-    print yellow("Username: %s" % user)
-    print yellow("PW: %s" % password)
+    print yellow("Create a rabbitmq user and a rabbitmq vhost in Web GUI (Tip:Lastpass)")
+    print yellow("username: %s" % user)
+    print yellow("pw: %s" % password)
     print yellow("vhost: %s" % vhost)
-    print yellow("Dem user alle Berechtigungen für den vhost geben.")
-    print yellow("Auf Server: monit reload")
+    print yellow("Give user (%s) all permissions for vhost (%s)" % (user, vhost))
+    print yellow("On server: monit reload")
 
 
 def restart_celery():
