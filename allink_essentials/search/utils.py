@@ -17,11 +17,13 @@ class SearchQuerySet(models.query.QuerySet):
 
          # Create the MATCH...AGAINST expressions
         fulltext_columns = ", ".join(full_names)
-        match_expr = ("MATCH(%s) AGAINST ('%s')" % (fulltext_columns, query))
+        match_expr = ("MATCH(%s) AGAINST (%%s)" % fulltext_columns)
 
          # Add the extra SELECT and WHERE options
         return self.extra(select={'relevance': match_expr},
-                                where=[match_expr])
+                                where=[match_expr],
+                                params=[query],
+                                select_params=[query])
 
 
 class SearchManager(models.Manager):
