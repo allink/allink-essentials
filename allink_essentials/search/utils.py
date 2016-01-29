@@ -3,8 +3,8 @@ from django.db import models
 
 class SearchQuerySet(models.query.QuerySet):
     def __init__(self, model=None, fields=None, using=None, query=None):
-         super(SearchQuerySet, self).__init__(model=model, using=using, query=query)
-         self._search_fields = fields
+        super(SearchQuerySet, self).__init__(model=model, using=using, query=query)
+        self._search_fields = fields
 
     def search(self, query):
 
@@ -15,15 +15,19 @@ class SearchQuerySet(models.query.QuerySet):
         columns = [meta.get_field(name, many_to_many=False).column for name in self._search_fields]
         full_names = ["%s.%s" % (meta.db_table, column) for column in columns]
 
-         # Create the MATCH...AGAINST expressions
+        # Create the MATCH...AGAINST expressions
         fulltext_columns = ", ".join(full_names)
-        match_expr = ("MATCH(%s) AGAINST (%%s)" % fulltext_columns)
+        match_expr = ("MATCH(%s) AGAINST (%%s IN BOOLEAN MODE)" % fulltext_columns)
+        match_expr_relevance = ("MATCH(%s) AGAINST (%%s)" % fulltext_columns)
 
-         # Add the extra SELECT and WHERE options
-        return self.extra(select={'relevance': match_expr},
-                                where=[match_expr],
-                                params=[query],
-                                select_params=[query])
+        prefix_query = ('* ').join(query.split(' ')) + '*'
+
+        # Add the extra SELECT and WHERE options
+        return self.extra(select={'relevance': match_expr_relevance, 'relevance2': match_expr},
+                        where=[match_expr],
+                        params=[prefix_query],
+                        select_params=[query, prefix_query],
+                        order_by=['-relevance2', '-relevance'])
 
 
 class SearchManager(models.Manager):
