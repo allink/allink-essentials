@@ -25,6 +25,7 @@ setup(
         'allink_essentials.middleware',
         'allink_essentials.storage',
         'allink_essentials.view',
+        'allink_essentials.view.v2',
         'allink_essentials.search',
         'allink_essentials.mixins',
     ],
