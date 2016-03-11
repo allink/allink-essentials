@@ -4,6 +4,8 @@ from django import http
 from django.template import Context, Engine, TemplateDoesNotExist, loader
 from django.utils import six
 from django.utils.translation import get_language
+from feincms.module.page.models import Page
+
 
 # this method is for django version >= 1.9
 # for older versions use view.page_not_found

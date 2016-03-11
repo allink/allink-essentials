@@ -2,6 +2,8 @@
 from django import http
 from django.template import RequestContext, TemplateDoesNotExist, loader, Template
 from django.utils.translation import get_language
+from feincms.module.page.models import Page
+
 
 # this method is for django version < 1.9
 # for newer versions use view.v2.page_not_found
