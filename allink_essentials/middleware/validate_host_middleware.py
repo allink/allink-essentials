@@ -1,6 +1,12 @@
 from django.conf import settings
-from django.contrib.sites.models import RequestSite, Site
+from django.contrib.sites.models import Site
 from django.http import HttpResponsePermanentRedirect
+
+try:
+    from django.contrib.sites.requests import RequestSite
+except:
+    # deprecated since Django 1.7, works until 1.9
+    from django.contrib.sites.models import RequestSite
 
 from urlparse import urlunparse
 
