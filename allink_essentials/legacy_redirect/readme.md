@@ -23,7 +23,7 @@ INSTALLED_APPS = [
     .
     .
     .
-    'legacy_redirect',
+    'allink_essentials.legacy_redirect',
     'import_export',
 ]
 ```
