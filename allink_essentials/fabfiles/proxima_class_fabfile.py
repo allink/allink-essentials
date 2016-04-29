@@ -196,6 +196,7 @@ def _update_requirements_remote():
         if virtualenv_existed:
             # virtualenv exists, build wheels for the new requirements
             with prefix('source env/bin/activate'):
+                run('pip install -U pip')
                 run('pip install wheel')
                 run('pip wheel --requirement REQUIREMENTS_SERVER')
             run('rm -r env_old', quiet=True)
@@ -204,6 +205,7 @@ def _update_requirements_remote():
         # create new virtualenv
         run('virtualenv env --prompt="(%s)"' % env.project)
         with prefix('source env/bin/activate'):
+            run('pip install -U pip')
             run('pip install %s --requirement REQUIREMENTS_SERVER' % ('--no-index' if virtualenv_existed else '',))
         # create new hash file
         run('sha1sum --tag REQUIREMENTS REQUIREMENTS_SERVER > REQUIREMENTS.sha1')

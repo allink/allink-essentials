@@ -152,6 +152,7 @@ def update_requirements():
     else:
         with cd(env.project_root):
             with prefix('source env/bin/activate'):
+                run('pip install -U pip')
                 run('pip install --requirement REQUIREMENTS_SERVER')
 
 
