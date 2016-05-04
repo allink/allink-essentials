@@ -1,4 +1,5 @@
 from django.http import HttpResponsePermanentRedirect
+from django.db.models import Q
 
 from allink_essentials.legacy_redirect.models import LegacyLink
 
@@ -10,7 +11,7 @@ class LegacyRedirectMiddleware(object):
     """
     def process_request(self, request):
         try:
-            link = LegacyLink.objects.get(old=request.path)
+            link = LegacyLink.objects.get(Q(old=request.path) | Q(old=request.path + '/'))
 
         # check for links which match subpages
         except LegacyLink.DoesNotExist:
