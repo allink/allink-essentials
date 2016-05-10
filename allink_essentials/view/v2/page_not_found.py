@@ -28,7 +28,7 @@ def page_not_found(request, exception, template_name='404.html'):
         if isinstance(message, six.text_type):
             exception_repr = message
     try:
-        feincms_page = Page.active().filter(languge=get_language())[0]
+        feincms_page = Page.objects.active().filter(languge=get_language())[0]
     except IndexError:
         feincms_page = None
     context = {
