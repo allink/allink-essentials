@@ -1,1 +1,1 @@
-default_app_config = 'legacy_redirect.apps.LegacyRedirectConfig'
+default_app_config = 'allink_essentials.legacy_redirect.apps.LegacyRedirectConfig'

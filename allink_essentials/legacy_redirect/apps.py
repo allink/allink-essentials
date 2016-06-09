@@ -3,5 +3,5 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class LegacyRedirectConfig(AppConfig):
-    name = 'legacy_redirect'
+    name = 'allink_essentials.legacy_redirect'
     verbose_name = _('Legacy Redirect')
