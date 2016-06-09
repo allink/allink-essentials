@@ -28,6 +28,7 @@ setup(
         'allink_essentials.view.v2',
         'allink_essentials.search',
         'allink_essentials.mixins',
+        'allink_essentials.legacy_redirect',
     ],
     # package_data={'allink_essentials':'templates/*.html'},
     classifiers=[
