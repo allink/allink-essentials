@@ -7,7 +7,7 @@ setup(
     version=allink_essentials.__version__,
     description='collection of code fragments',
     long_description='collection of code fragments',
-    author='Marc Egli',
+    author='Leandra Finger, Marc Egli',
     author_email='itcrowd@allink.ch',
     url='http://github.com/allink/allink-essentials/',
     license='BSD License',
@@ -29,6 +29,7 @@ setup(
         'allink_essentials.search',
         'allink_essentials.mixins',
         'allink_essentials.legacy_redirect',
+        'allink_essentials.legacy_redirect.migrations',
     ],
     # package_data={'allink_essentials':'templates/*.html'},
     classifiers=[
