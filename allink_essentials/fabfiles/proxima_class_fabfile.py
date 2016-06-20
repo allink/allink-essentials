@@ -255,7 +255,7 @@ def setup_celery():
     allowed_chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
     password = ''.join(random.choice(allowed_chars) for i in range(10))
     _add_to_dotenv('BROKER_URL', 'amqp://%s:%s@localhost:5672/%s' % (user, password, vhost))
-    _add_to_dotenv('CELERY_RESULT_BACKEND', 'redis://localhost/0')
+    _add_to_dotenv('CELERY_RESULT_BACKEND', 'redis://127.0.0.1:6379/0')
 
     print magenta("Create Monit File")
     with cd('/home/www-data/etc/monit.d/'):
