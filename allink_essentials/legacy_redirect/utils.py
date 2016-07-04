@@ -3,6 +3,7 @@ from django.conf import settings
 from django.utils import translation
 
 from django.contrib.sites.models import Site
+from importlib import import_module
 
 _base_url = None
 
@@ -16,7 +17,8 @@ def choices_from_sitemaps():
         - Display page language where we can get to it
         - Handle i18n sitemaps correctly
     '''
-    from cnd_ag.urls import sitemaps
+    url_mod = import_module(settings.ROOT_URLCONF)
+    sitemaps = url_mod.sitemaps
 
     def label_from_instance(instance, lang=None):
         if hasattr(instance, '_mptt_meta'):
