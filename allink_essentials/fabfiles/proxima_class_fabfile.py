@@ -78,7 +78,7 @@ def bootstrap():
     if os.path.isdir('locale'):
         execute('compilemessages')
 
-    execute('update_js_requirements')
+    # execute('update_js_requirements')
     execute('collectstatic')
     execute('create_monit_file')
 
