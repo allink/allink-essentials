@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from django import forms
-from django.conf import settings
 from django.utils.translation import get_language, ugettext_lazy as _
 
-import mailchimp
+from .config import MailChimpConfig
+from helpers import list_members_put, get_status_if_new
+
+config = MailChimpConfig()
 
 
 class SignupForm(forms.Form):
@@ -14,13 +16,14 @@ class SignupForm(forms.Form):
         email = self.cleaned_data['email']
         language = self.cleaned_data['language'] if 'language' in self.cleaned_data else get_language()
 
-        list_id = settings.MAILCHIMP_LIST_ID
-        double_optin = getattr(settings, 'MAILCHIMP_DOUBLE_OPTIN', True)
-        send_welcome = getattr(settings, 'MAILCHIMP_SEND_WELCOME', True)
-        additional_fields = getattr(settings, 'MAILCHIMP_ADDITIONAL_FIELDS', {})
+        data = {
+            'email_address': email,
+            'status': 'subscribed',
+            'status_if_new': get_status_if_new(),
+            'language': language
+        }
 
-        merge_vars = {'mc_language': language}
-        merge_vars.update(additional_fields)  # adding extra fields with default value
+        if config.merge_vars:
+            data = data.append(config.merge_vars)
 
-        m = mailchimp.Mailchimp(settings.MAILCHIMP_API_KEY)
-        m.lists.subscribe(list_id, {'email': email}, double_optin=double_optin, send_welcome=send_welcome, update_existing=True, merge_vars=merge_vars)
+        list_members_put(data)
