@@ -24,6 +24,11 @@ class SignupForm(forms.Form):
         }
 
         if config.merge_vars:
-            data = data.append(config.merge_vars)
+            data.update(config.merge_vars)
+
+        if config.additional_fields:
+            if not data.get('merge_fields'):
+                data['merge_fields'] = {}
+            data.get('merge_fields').update(config.additional_fields)
 
         list_members_put(data)

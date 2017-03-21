@@ -13,6 +13,7 @@ config = MailChimpConfig()
 
 def check_response_status(response):
     raven_config = getattr(settings, 'RAVEN_CONFIG', '')
+    client = None
     if raven_config:
         client = Client(raven_config.get('dns'))
     try:
