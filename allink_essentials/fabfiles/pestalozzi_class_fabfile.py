@@ -232,7 +232,7 @@ def create_database():
         database = env.unique_identifier
         allowed_chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
         password = ''.join(random.choice(allowed_chars) for i in range(10))
-        run('sudo nine-manage-databases database create --user=ndm_%s -p %s nmd_%s' % (user, password, database))
+        run('sudo nine-manage-databases database create --user=ndm_%s --password=%s nmd_%s' % (user, password, database))
         _add_to_dotenv('DATABASE_URL', 'postgres://ndm_%s:%s@localhost/ndm_%s' % (user, password, database))
         _add_to_dotenv('PG_USER', 'nmd_%s' % (user))
         _add_to_dotenv('PG_PASSWORD', '%s' % (password))
