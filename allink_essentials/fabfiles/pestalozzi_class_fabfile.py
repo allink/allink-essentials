@@ -206,7 +206,7 @@ def _update_requirements_remote():
         run('virtualenv env --prompt="(%s)"' % env.project)
         with prefix('source env/bin/activate'):
             run('pip install -U pip')
-            run('pip install %s --requirement REQUIREMENTS_SERVER' % ('--no-index' if virtualenv_existed else '',))
+            run('pip install --requirement REQUIREMENTS_SERVER')
         # create new hash file
         run('sha1sum --tag REQUIREMENTS REQUIREMENTS_SERVER > REQUIREMENTS.sha1')
 
@@ -308,12 +308,14 @@ def dump_database():
     env.ok_ret_codes = save_ok_ret_codes
     run_local('psql -U $PGUSER -d postgres -c "CREATE DATABASE %s;"' % (env.project_python,))
     import time
-    timestamp = time.time().replace('.', '')
+    timestamp = unicode(time.time()).replace('.', '')
     with cd(env.project_root):
         with prefix('source env/bin/activate'):
-            run("pg_dump -U$PG_USER -p$PG_PASSWORD  --no-privileges --no-owner --no-reconnect nmd_%s | gzip > db_dump_%s.sql.gz" % (env.user, env.hosts[0], env.unique_identifier, timestamp))
+            run("source .env")
+            run("pg_dump --no-privileges --no-owner --no-reconnect --dbname=$DATABASE_URL | gzip > db_dump_%s.sql.gz" % timestamp)
 
-    run_local('rsync %s@%s:%s/db_dump_%s.sql.gz db_dump.sql.gz' % (env.user, env.hosts[0], env.project_root, timestamp))
+    remote_dump = os.path.join(env.project_root, 'db_dump_%s.sql.gz' % timestamp)
+    run_local('rsync %s@%s:%s db_dump.sql.gz' % (env.user, env.hosts[0], remote_dump))
     run_local('gunzip db_dump.sql.gz | psql --quiet -U$PGUSER %s' % env.project_python)
     run_local('rm db_dump.sql.gz')
     with cd(env.project_root):
