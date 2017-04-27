@@ -310,14 +310,13 @@ def dump_database():
     import time
     timestamp = unicode(time.time()).replace('.', '')
     with cd(env.project_root):
-        with prefix('source env/bin/activate'):
-            run("source .env")
+        with prefix('source .env'):
             run("pg_dump --no-privileges --no-owner --no-reconnect --dbname=$DATABASE_URL | gzip > db_dump_%s.sql.gz" % timestamp)
-
     remote_dump = os.path.join(env.project_root, 'db_dump_%s.sql.gz' % timestamp)
-    run_local('rsync %s@%s:%s db_dump.sql.gz' % (env.user, env.hosts[0], remote_dump))
-    run_local('gunzip db_dump.sql.gz | psql --quiet -U$PGUSER %s' % env.project_python)
-    run_local('rm db_dump.sql.gz')
+    run_local('rsync -rvaz %s@%s:%s db_dump.sql.gz' % (env.user, env.hosts[0], remote_dump))
+    run_local('gunzip db_dump.sql.gz')
+    run_local('psql --quiet -U$PGUSER %s < db_dump.sql' % env.project_python)
+    run_local('rm db_dump.sql')
     with cd(env.project_root):
         with prefix('source env/bin/activate'):
             run('rm db_dump_%s.sql.gz' % timestamp)
