@@ -11,7 +11,7 @@ class LegacyRedirectMiddleware(object):
     """
     def process_request(self, request):
         try:
-            link = LegacyLink.objects.get(Q(old=request.path) | Q(old=request.path + '/'))
+            link = LegacyLink.objects.get(Q(old=request.path) | Q(old=request.path + '/') | Q(old=request.path[:-1]))
 
         # check for links which match subpages
         except LegacyLink.DoesNotExist:
