@@ -199,7 +199,7 @@ def _update_requirements_remote():
                 run('pip install -U pip')
                 run('pip install wheel')
                 run('pip wheel --requirement REQUIREMENTS_SERVER')
-            run('rm -r env_old', quiet=True)
+            run('rm -rf env_old', quiet=True)
             run('mv env env_old')
 
         # create new virtualenv
